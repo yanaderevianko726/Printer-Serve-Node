@@ -26,7 +26,6 @@ exports.create = (req, res) => {
       message: "Content can not be empty!"
     });
   }
-  console.log(req.body);
 
   // Create a Pdf
   const pdfs = new Pdfs(req.body);
