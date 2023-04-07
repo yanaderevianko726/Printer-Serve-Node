@@ -1,6 +1,7 @@
+const ThermalSdk = require("../utils/thermalsdk.js");
 
 // constructor
-const Pdfs = function(pdfs) {
+const Pdfs = function (pdfs) {
   this.fullName = pdfs.fullName;
   this.pmKey = pdfs.pmKey;
   this.lockerNumber = pdfs.lockerNumber;
@@ -9,9 +10,12 @@ const Pdfs = function(pdfs) {
   this.endAt = pdfs.endAt;
 };
 
-User.create = (newPdf, result) => {
-  const pdfName = newPdf.bookType == 'EMOS-3' ? 'Receipt-3.pdf' : 'Receipt-5.pdf';
-  result(null, { pdfName: pdfName, ...newPdf });
+Pdfs.init = (str, result) => {
+  result(null, { retVal: str });
+};
+
+Pdfs.create = (newPdf, result) => {
+  ThermalSdk.setPrintPort(newPdf, { portName: "USB001", portRate: 9600 }, result);
 };
 
 module.exports = Pdfs;

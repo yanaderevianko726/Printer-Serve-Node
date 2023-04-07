@@ -1,5 +1,23 @@
 const Pdfs = require("../models/pdf.model.js");
 
+exports.init = (req, res) => {
+  // Validate request
+  if (!req.body) {
+    res.status(400).send({
+      message: "Content can not be empty!"
+    });
+  }
+
+  Pdfs.init('welcome', (err, data) => {
+    if (err)
+      res.status(500).send({
+        message:
+          err.message || "There are some error in connection."
+      });
+    else res.send(data);
+  });
+};
+
 // Create and Save a new Pdf
 exports.create = (req, res) => {
   // Validate request
@@ -8,16 +26,10 @@ exports.create = (req, res) => {
       message: "Content can not be empty!"
     });
   }
+  console.log(req.body);
 
   // Create a Pdf
-  const pdfs = new Pdfs({
-    fullName: req.body.fullName,
-    pmKey: req.body.pmKey,
-    lockerNumber: req.body.lockerNumber,
-    bookType: req.body.bookType,
-    startedAt: req.body.startedAt,
-    endAt: req.body.endAt
-  });
+  const pdfs = new Pdfs(req.body);
 
   // Save Pdf in the pc downloads folder
   Pdfs.create(pdfs, (err, data) => {

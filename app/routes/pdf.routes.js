@@ -3,8 +3,8 @@ module.exports = app => {
 
   var router = require("express").Router();
 
-  // Create a new Pdf
-  router.post("/", pdfController.create);
+  router.get("/", pdfController.init);
+  router.post("/create", pdfController.create);
 
   app.use('/api/pdfs', router);
 };
