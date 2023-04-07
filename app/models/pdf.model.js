@@ -1,5 +1,3 @@
-const sql = require("./db.js");
-const tb_name = 'users';
 
 // constructor
 const Pdfs = function(pdfs) {
