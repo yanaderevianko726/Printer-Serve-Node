@@ -42,6 +42,7 @@ var printSdk = edge.func(function () {/*
         {
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
+            
             return clsPdf.bookType;
         }
     }
