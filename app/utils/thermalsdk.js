@@ -35,13 +35,36 @@ var printSdk = edge.func(function () {/*
 
     public class Startup
     {
+        [DllImport("kernel32.dll", EntryPoint = "GetSystemDefaultLCID")]
+        public static extern int GetSystemDefaultLCID();  
+
+        [DllImport("Msprintsdk.dll", EntryPoint = "SetInit", CharSet = CharSet.Ansi)]
+        public static extern int SetInit();
+
+        [DllImport("Msprintsdk.dll", EntryPoint = "SetCommandmode", CharSet = CharSet.Ansi)]
+        public static extern int SetCommandmode(int iMode);
+
         [DllImport("Msprintsdk.dll", EntryPoint = "SetPrintport", CharSet = CharSet.Ansi)]
         public static extern int SetPrintport(StringBuilder strPort, int iBaudrate);
+
+        string cboPort = "USB001";
+        string cboBandrate = "115200";
+        int m_iInit = -1;
 
         public async Task<object> Invoke(dynamic input)
         {
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
+
+            StringBuilder sPort = new StringBuilder(cboPort, cboPort.Length);
+            int iBaudrate = int.Parse(cboBandrate);
+            SetPrintport(sPort, iBaudrate);
+
+            // m_iInit = SetInit();
+            // if (m_iInit == 0)
+            // {
+                // SetCommandmode(3);
+            // }
             
             return clsPdf.bookType;
         }

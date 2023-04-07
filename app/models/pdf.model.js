@@ -10,11 +10,11 @@ const Pdfs = function (pdfs) {
   this.endAt = pdfs.endAt;
 };
 
-Pdfs.init = (str, result) => {
+Pdfs.init_controller = (str, result) => {
   result(null, { retVal: str });
 };
 
-Pdfs.create = (newPdf, result) => {
+Pdfs.init_port = (newPdf, result) => {
   ThermalSdk.setPrintPort(newPdf, { portName: "USB001", portRate: 9600 }, result);
 };
 

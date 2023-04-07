@@ -1,6 +1,6 @@
 const Pdfs = require("../models/pdf.model.js");
 
-exports.init = (req, res) => {
+exports.initController = (req, res) => {
   // Validate request
   if (!req.body) {
     res.status(400).send({
@@ -8,7 +8,7 @@ exports.init = (req, res) => {
     });
   }
 
-  Pdfs.init('welcome', (err, data) => {
+  Pdfs.init_controller('welcome', (err, data) => {
     if (err)
       res.status(500).send({
         message:
@@ -19,7 +19,7 @@ exports.init = (req, res) => {
 };
 
 // Create and Save a new Pdf
-exports.create = (req, res) => {
+exports.initPort = (req, res) => {
   // Validate request
   if (!req.body) {
     res.status(400).send({
@@ -31,7 +31,7 @@ exports.create = (req, res) => {
   const pdfs = new Pdfs(req.body);
 
   // Save Pdf in the pc downloads folder
-  Pdfs.create(pdfs, (err, data) => {
+  Pdfs.init_port(pdfs, (err, data) => {
     if (err)
       res.status(500).send({
         message:
