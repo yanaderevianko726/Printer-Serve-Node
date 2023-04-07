@@ -2,6 +2,17 @@ var edge = require('edge-js');
 
 var printSdk = edge.func(function () {/*
     using System.Threading.Tasks;
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Drawing;
+    using System.Linq;
+    using System.Text;
+    using System.Runtime.InteropServices;
+    using System.IO.Ports;
+    using System.Reflection;
+    using System.Text.RegularExpressions;
+    using System.Diagnostics; 
 
     public class ClsPdf
     {
@@ -24,6 +35,9 @@ var printSdk = edge.func(function () {/*
 
     public class Startup
     {
+        [DllImport("Msprintsdk.dll", EntryPoint = "SetPrintport", CharSet = CharSet.Ansi)]
+        public static extern int SetPrintport(StringBuilder strPort, int iBaudrate);
+
         public async Task<object> Invoke(dynamic input)
         {
             ClsPdf clsPdf = new ClsPdf();
