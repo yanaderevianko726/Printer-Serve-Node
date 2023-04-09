@@ -12,7 +12,8 @@ var printSdk = edge.func(function () {/*
     using System.IO.Ports;
     using System.Reflection;
     using System.Text.RegularExpressions;
-    using System.Diagnostics; 
+    using System.Runtime.CompilerServices;
+    using System.Diagnostics;
 
     public class ClsPdf
     {
@@ -35,8 +36,6 @@ var printSdk = edge.func(function () {/*
 
     public class Startup
     {
-        [DllImport("kernel32.dll", EntryPoint = "GetSystemDefaultLCID")]
-        public static extern int GetSystemDefaultLCID();  
 
         [DllImport("Msprintsdk.dll", EntryPoint = "SetInit", CharSet = CharSet.Ansi)]
         public static extern int SetInit();
