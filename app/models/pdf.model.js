@@ -15,7 +15,7 @@ Pdfs.init_controller = (str, result) => {
 };
 
 Pdfs.init_port = (newPdf, result) => {
-  ThermalSdk.setPrintPort(newPdf, { portName: "USB001", portRate: 9600 }, result);
+  ThermalSdk.setPrintPort(newPdf, { portName: "USBAuto", portRate: 115200 }, result);
 };
 
 module.exports = Pdfs;
