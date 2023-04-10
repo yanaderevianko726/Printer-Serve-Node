@@ -1,6 +1,6 @@
 var edge = require('edge-js');
 
-export const initPrinterPort = edge.func(function () {/*
+var initPrinterPort = edge.func(function () {/*
     using System.Threading.Tasks;
     using System;
     using System.Collections.Generic;
@@ -75,4 +75,19 @@ export const initPrinterPort = edge.func(function () {/*
         }
     }
 */});
+
+// constructor
+const InitPort = function (obj) {
+
+};
+
+InitPort.setPrintPort = (newPdf, portData, result) => {
+    initPrinterPort(newPdf, function (error, retVal) {
+        if (error) throw error;
+        console.log(retVal);
+        result(null, { retInt: retVal, ...portData });
+    });
+};
+
+module.exports = InitPort;
 

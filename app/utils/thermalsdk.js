@@ -1,4 +1,4 @@
-const initPrinterPort = require("./initport.js");
+const InitPort = require("./initport.js");
 
 // constructor
 const ThermalSdk = function (obj) {
@@ -6,11 +6,7 @@ const ThermalSdk = function (obj) {
 };
 
 ThermalSdk.setPrintPort = (newPdf, portData, result) => {
-    initPrinterPort(newPdf, function (error, retVal) {
-        if (error) throw error;
-        console.log(retVal);
-        result(null, { retInt: retVal, ...portData });
-    });
+    InitPort.setPrintPort(newPdf, portData, result);
 };
 
 module.exports = ThermalSdk;
