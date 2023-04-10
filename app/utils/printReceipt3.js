@@ -1,5 +1,5 @@
 var edge = require('edge-js');
-var edgeInitPort = edge.func(function () {/*
+var edgePrintReceipt3 = edge.func(function () {/*
     using System.Threading.Tasks;
     using System;
     using System.Collections.Generic;
@@ -13,6 +13,25 @@ var edgeInitPort = edge.func(function () {/*
     using System.Text.RegularExpressions;
     using System.Runtime.CompilerServices;
     using System.Diagnostics;
+
+    public class ClsPdf
+    {
+        public string  fullName = "";
+        public string  pmKey = "";
+        public string lockerNumber = "";
+        public string bookType = "";
+        public string startedAt = "";
+        public string endAt = "";
+
+        public void initWithDynamic(dynamic input){
+            fullName = input.fullName;
+            pmKey = input.pmKey;
+            lockerNumber = input.lockerNumber;
+            bookType = input.bookType;
+            startedAt = input.startedAt;
+            endAt = input.endAt;
+        }
+    }
 
     public class Startup
     {
@@ -35,6 +54,9 @@ var edgeInitPort = edge.func(function () {/*
 
         public async Task<object> Invoke(dynamic input)
         {
+            ClsPdf clsPdf = new ClsPdf();
+            clsPdf.initWithDynamic(input);
+
             StringBuilder sPort = new StringBuilder(cboPort, cboPort.Length);
             int iBaudrate = int.Parse(cboBandrate);
             r = SetPrintport(sPort, iBaudrate);
@@ -53,17 +75,17 @@ var edgeInitPort = edge.func(function () {/*
 */});
 
 // constructor
-const InitPort = function (obj) {
+const PrintReceipt3 = function (obj) {
 
 };
 
-InitPort.setPrintPort = (thermal, result) => {
-    edgeInitPort("edgeInitPort", function (error, retVal) {
+PrintReceipt3.printReceipt3 = (pdfs, thermal, result) => {
+    edgePrintReceipt3(pdfs, function (error, retVal) {
         if (error) throw error;
         console.log(retVal);
         result(null, { retInt: retVal, ...thermal });
     });
 };
 
-module.exports = InitPort;
+module.exports = PrintReceipt3;
 
