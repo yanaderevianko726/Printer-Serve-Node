@@ -1,4 +1,11 @@
 const Pdfs = require("../models/pdf.model.js");
+const InitPort = require("../utils/initport.js");
+const ThermalPrinter = require("../models/thermal.model.js");
+
+var thermal = new ThermalPrinter({
+  portName: "USBAuto",
+  portRate: "115200"
+});
 
 exports.initController = (req, res) => {
   // Validate request
@@ -8,7 +15,7 @@ exports.initController = (req, res) => {
     });
   }
 
-  Pdfs.init_controller('welcome', (err, data) => {
+  ThermalPrinter.init_controller('welcome', (err, data) => {
     if (err)
       res.status(500).send({
         message:
@@ -29,9 +36,7 @@ exports.initPort = (req, res) => {
 
   // Create a Pdf
   const pdfs = new Pdfs(req.body);
-
-  // Save Pdf in the pc downloads folder
-  Pdfs.init_port(pdfs, (err, data) => {
+  InitPort.setPrintPort(pdfs, thermal, (err, data) => {
     if (err)
       res.status(500).send({
         message:

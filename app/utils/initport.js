@@ -81,11 +81,11 @@ const InitPort = function (obj) {
 
 };
 
-InitPort.setPrintPort = (newPdf, portData, result) => {
-    initPrinterPort(newPdf, function (error, retVal) {
+InitPort.setPrintPort = (pdfs, thermal, result) => {
+    initPrinterPort(pdfs, function (error, retVal) {
         if (error) throw error;
         console.log(retVal);
-        result(null, { retInt: retVal, ...portData });
+        result(null, { retInt: retVal, ...thermal });
     });
 };
 

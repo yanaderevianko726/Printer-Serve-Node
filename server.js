@@ -21,7 +21,7 @@ app.get("/", (req, res) => {
   res.json({ message: "Welcome to our application." });
 });
 
-require("./app/routes/pdf.routes.js")(app);
+require("./app/routes/thermal.routes.js")(app);
 require("./app/routes/user.routes.js")(app);
 
 app.listen(PORT, () => {
