@@ -1,5 +1,4 @@
 var edge = require('edge-js');
-
 var initPrinterPort = edge.func(function () {/*
     using System.Threading.Tasks;
     using System;
@@ -51,7 +50,7 @@ var initPrinterPort = edge.func(function () {/*
 
         string cboPort = "USBAuto";
         string cboBandrate = "115200";
-        int m_iInit = -1;
+        int m_iInit = -1, r = -1, s = -1, b = -1;
 
         public async Task<object> Invoke(dynamic input)
         {
@@ -60,8 +59,7 @@ var initPrinterPort = edge.func(function () {/*
 
             StringBuilder sPort = new StringBuilder(cboPort, cboPort.Length);
             int iBaudrate = int.Parse(cboBandrate);
-            int r = SetPrintport(sPort, iBaudrate);
-            int s = -1, b = -1;
+            r = SetPrintport(sPort, iBaudrate);
 
             s = SetUsbportauto();
 

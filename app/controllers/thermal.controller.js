@@ -14,15 +14,7 @@ exports.initController = (req, res) => {
       message: "Content can not be empty!"
     });
   }
-
-  ThermalPrinter.init_controller('welcome', (err, data) => {
-    if (err)
-      res.status(500).send({
-        message:
-          err.message || "There are some error in connection."
-      });
-    else res.send(data);
-  });
+  res.send("Welcome");
 };
 
 // Create and Save a new Pdf
