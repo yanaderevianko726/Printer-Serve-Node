@@ -57,15 +57,15 @@ var printSdk = edge.func(function () {/*
 
             StringBuilder sPort = new StringBuilder(cboPort, cboPort.Length);
             int iBaudrate = int.Parse(cboBandrate);
-            SetPrintport(sPort, iBaudrate);
+            int r = SetPrintport(sPort, iBaudrate);
 
-            // m_iInit = SetInit();
-            // if (m_iInit == 0)
-            // {
-                // SetCommandmode(3);
-            // }
+            m_iInit = SetInit();
+            if (m_iInit == 0)
+            {
+                SetCommandmode(3);
+            }
             
-            return clsPdf.bookType;
+            return m_iInit;
         }
     }
 */});
