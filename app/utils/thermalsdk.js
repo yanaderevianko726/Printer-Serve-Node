@@ -46,7 +46,10 @@ var printSdk = edge.func(function () {/*
         [DllImport("Msprintsdk.dll", EntryPoint = "SetPrintport", CharSet = CharSet.Ansi)]
         public static extern int SetPrintport(StringBuilder strPort, int iBaudrate);
 
-        string cboPort = "USB001";
+        [DllImport("Msprintsdk.dll", EntryPoint = "SetUsbportauto", CharSet = CharSet.Ansi)]
+        public static extern int SetUsbportauto();
+
+        string cboPort = "USBAuto";
         string cboBandrate = "115200";
         int m_iInit = -1;
 
@@ -58,14 +61,17 @@ var printSdk = edge.func(function () {/*
             StringBuilder sPort = new StringBuilder(cboPort, cboPort.Length);
             int iBaudrate = int.Parse(cboBandrate);
             int r = SetPrintport(sPort, iBaudrate);
+            int s = -1, b = -1;
+
+            s = SetUsbportauto();
 
             m_iInit = SetInit();
             if (m_iInit == 0)
             {
-                SetCommandmode(3);
+                b = SetCommandmode(3);
             }
             
-            return m_iInit;
+            return s;
         }
     }
 */});
