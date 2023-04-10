@@ -5,6 +5,7 @@ module.exports = app => {
   router.get("/", thermalController.initController);
   router.post("/initport", thermalController.initPort);
   router.post("/printReceipt3", thermalController.printReceipt3);
+  router.post("/printReceipt5", thermalController.printReceipt5);
 
   app.use('/api/thermal', router);
 };
