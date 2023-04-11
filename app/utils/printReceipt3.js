@@ -17,8 +17,8 @@ var edgePrintReceipt3 = edge.func(function () {/*
 
     public class ClsPdf
     {
-        public string  fullName = "";
-        public string  pmKey = "";
+        public string fullName = "";
+        public string pmKey = "";
         public string lockerNumber = "";
         public string bookType = "";
         public string startedAt = "";
