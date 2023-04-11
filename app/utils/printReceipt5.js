@@ -36,8 +36,17 @@ var edgePrintReceipt5 = edge.func(function () {/*
 
     public class Startup
     {
+        [DllImport("Msprintsdk.dll", EntryPoint = "SetInit", CharSet = CharSet.Ansi)]
+        public static extern int SetInit();
+
         [DllImport("Msprintsdk.dll", EntryPoint = "SetCommandmode", CharSet = CharSet.Ansi)]
         public static extern int SetCommandmode(int iMode);
+
+        [DllImport("Msprintsdk.dll", EntryPoint = "SetPrintport", CharSet = CharSet.Ansi)]
+        public static extern int SetPrintport(StringBuilder strPort, int iBaudrate);
+
+        [DllImport("Msprintsdk.dll", EntryPoint = "SetUsbportauto", CharSet = CharSet.Ansi)]
+        public static extern int SetUsbportauto();
 
         [DllImport("Msprintsdk.dll", EntryPoint = "SetSizetext", CharSet = CharSet.Ansi)]
         public static extern int SetSizetext(int iHeight,int iWidth);
@@ -69,41 +78,64 @@ var edgePrintReceipt5 = edge.func(function () {/*
         [DllImport("Msprintsdk.dll", EntryPoint = "SetLinespace", CharSet = CharSet.Ansi)]
         public static extern int SetLinespace(int iLinespace);
 
+        string cboPort = "USBAuto";
+        string cboBandrate = "115200";
+        int m_iInit = -1, r = -1, s = -1, b = -1;
+
         public async Task<object> Invoke(dynamic input)
         {
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
+
+            StringBuilder sPort = new StringBuilder(cboPort, cboPort.Length);
+            int iBaudrate = int.Parse(cboBandrate);
+            r = SetPrintport(sPort, iBaudrate);
+
+            s = SetUsbportauto();
+
+            m_iInit = SetInit();
+            if (m_iInit == 0)
+            {
+                b = SetCommandmode(3);
+            }
 
             StringBuilder sbData = new StringBuilder("");
             SetCommandmode(3);
 
             SetAlignment(0);
             SetBold(1);
-            SetSizetext(3, 3);
+            SetSizetext(2, 2);
 
             sbData = new StringBuilder("Downer Defence");
+            SetLinespace(5);
             PrintString(sbData, 0);
 
             SetSizetext(2, 2);     
             sbData = new StringBuilder("Gallipoli Barracks");
+            SetLinespace(8);
             PrintString(sbData, 0);
 
             SetSizetext(1, 1);      
-            sbData = new StringBuilder("EMOS-3");
+            sbData = new StringBuilder("EMOS-5");
+            SetLinespace(12);
             PrintString(sbData, 0);
 
             SetBold(0);
             SetSizetext(0, 0);
 
             sbData = new StringBuilder("Full Name      : Justin Dean");
+            SetLinespace(3);
             PrintString(sbData, 0);
 
-            sbData = new StringBuilder("PM Key         : 1234");
+            sbData = new StringBuilder("PM Key         : 12345");
+            SetLinespace(3);
             PrintString(sbData, 0);
 
             sbData = new StringBuilder("Locker Number  : 18");
+            SetLinespace(3);
             PrintString(sbData, 0);
 
+            PrintFeedline(2);
             PrintCutpaper(0);
             SetClean();
             
