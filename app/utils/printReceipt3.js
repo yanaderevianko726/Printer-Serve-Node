@@ -98,24 +98,59 @@ var edgePrintReceipt3 = edge.func(function () {/*
             SetCommandmode(3);
             PrintFeedline(2);
 
-            SetSizetext(1, 1);
             SetAlignment(0);
             SetBold(1);
+            SetSizetext(1, 1); 
 
-            PrintString(new StringBuilder("Downer Defence"), 0);
             PrintString(new StringBuilder("Gallipoli Barracks"), 0);
             PrintFeedline(1);
-
-            SetSizetext(1, 1); 
+            
+            SetSizetext(0, 0); 
             PrintString(new StringBuilder("EMOS-3"), 0);
             PrintFeedline(1);
 
             SetBold(0);
             SetSizetext(0, 0);
 
-            PrintString(new StringBuilder("Full Name      : Justin Dean"), 0);
-            PrintString(new StringBuilder("PM Key         : 1234"), 0);
-            PrintString(new StringBuilder("Locker Number  : 18"), 0);
+            PrintString(new StringBuilder("PMKEY                 : 1234"), 0);
+            PrintString(new StringBuilder("Rank                  : Pvt"), 0);
+            PrintString(new StringBuilder("First Name            : Justin"), 0);
+            PrintString(new StringBuilder("Last Name             : Dean"), 0);
+            PrintString(new StringBuilder("Arrival Date          : Sat, 12 April 2023"), 0);
+            PrintString(new StringBuilder("Departure Date        : Sat, 23 April 2023"), 0);
+            PrintString(new StringBuilder("Building              : 1"), 0);
+            PrintString(new StringBuilder("Room                  : 1"), 0);
+            PrintString(new StringBuilder("Contact Number        : 0405 700 455"), 0);
+            PrintString(new StringBuilder("Vehicle Registration  : EEEEEE"), 0);
+            PrintString(new StringBuilder("Locker Number         : 18"), 0);
+            PrintFeedline(1);
+            PrintString(new StringBuilder("Use last 4 digits of PMKEY to access locker"), 0);
+            PrintString(new StringBuilder("****"), 0);
+            PrintFeedline(1);
+            PrintString(new StringBuilder("By Accepting the issued key to the assigned "), 0);
+            PrintString(new StringBuilder("room, the member acknowledges:"), 0);
+            PrintFeedline(1);
+            PrintString(new StringBuilder(" · Awareness of PACMAN Annex 7.4.A Living-in"), 0);            
+            PrintString(new StringBuilder("   Accommodation"), 0);
+            PrintString(new StringBuilder(" · To immediately report all defects / damaged"), 0);            
+            PrintString(new StringBuilder("   to allow neccessary repair and rectification"), 0);
+            PrintString(new StringBuilder(" · Occupant must leave the assigned room neat,"), 0);            
+            PrintString(new StringBuilder("   tidy, and in the same condition as at the"), 0);            
+            PrintString(new StringBuilder("   starting date"), 0);
+            PrintString(new StringBuilder(" · Please check out prior to 10:00 am on day"), 0);            
+            PrintString(new StringBuilder("   of departure"), 0);
+            PrintFeedline(1);
+            PrintString(new StringBuilder("Business Hours Key Return:"), 0);
+            PrintFeedline(1);           
+            PrintString(new StringBuilder("Accommodation Office (BLD F079) located at the"), 0);          
+            PrintString(new StringBuilder("Monash Centre Ph: 07 3434 5446"), 0);
+            PrintFeedline(1);
+            PrintString(new StringBuilder("After Hours Key Return:"), 0);
+            PrintFeedline(1);           
+            PrintString(new StringBuilder("Accommodation After Hours Key Safe Lockers, "), 0);          
+            PrintString(new StringBuilder("located opposite Downer accommodation office"), 0);        
+            PrintString(new StringBuilder("within the Monash Centre (Bld F079) Duty Officer"), 0);    
+            PrintString(new StringBuilder("Phone: 0438 710 603"), 0);
             PrintFeedline(2);
 
             return 1;
