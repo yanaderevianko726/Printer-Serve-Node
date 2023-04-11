@@ -65,6 +65,9 @@ var edgePrintReceipt5 = edge.func(function () {/*
 
         [DllImport("Msprintsdk.dll", EntryPoint = "PrintCutpaper", CharSet = CharSet.Ansi)]
         public static extern int PrintCutpaper(int iMode);
+        
+        [DllImport("Msprintsdk.dll", EntryPoint = "SetLinespace", CharSet = CharSet.Ansi)]
+        public static extern int SetLinespace(int iLinespace);
 
         public async Task<object> Invoke(dynamic input)
         {
@@ -74,50 +77,48 @@ var edgePrintReceipt5 = edge.func(function () {/*
             StringBuilder sbData = new StringBuilder("");
             SetCommandmode(3);
 
-            SetAlignment(1);
+            SetAlignment(0);
             SetBold(1);
-            sbData = new StringBuilder("** Downer Defence **");
+            SetSizetext(2, 2);      
+            sbData = new StringBuilder("Downer Defence");
             PrintString(sbData, 0);
 
-            SetAlignment(1);
+            SetAlignment(0);
             SetBold(1);
-            sbData = new StringBuilder("** Gallipoli Barracks **");
+            SetSizetext(2, 2);     
+            sbData = new StringBuilder("Gallipoli Barracks");
+            PrintString(sbData, 0);
+
+            SetAlignment(0);
+            SetBold(1);
+            SetSizetext(1, 1);      
+            sbData = new StringBuilder("EMOS-3");
             PrintString(sbData, 0);
 
             SetAlignment(0);
             SetBold(0);
-            PrintFeedline(1);
-
-            SetAlignment(1);
-            SetBold(1);
-            sbData = new StringBuilder("** EMOS-5 **");
-            PrintString(sbData, 0);
-            PrintFeedline(1);
-
-            SetLeftmargin(24);
-            sbData = new StringBuilder("C:\\PrinterNodeServe\\downer_logo.bmp");
-            PrintDiskbmpfile(sbData);
-            SetClean();
-
-            Thread.Sleep(1000);
-
-            SetLeftmargin(0);
-            PrintFeedline(1);
-
+            SetSizetext(0, 0);
             sbData = new StringBuilder("Full Name      : Justin Dean");
             PrintString(sbData, 0);
 
+            SetAlignment(0);
+            SetBold(0);
+            SetSizetext(0, 0);
             sbData = new StringBuilder("PM Key         : 1234");
             PrintString(sbData, 0);
 
+            SetAlignment(0);
+            SetBold(0);
+            SetSizetext(0, 0);
             sbData = new StringBuilder("Locker Number  : 18");
             PrintString(sbData, 0);
-            PrintFeedline(1);
 
-            sbData = new StringBuilder(DateTime.Now.ToLocalTime().ToString());
+            SetAlignment(0);
+            SetBold(0);
+            SetSizetext(0, 0);
+            sbData = new StringBuilder("Locker Number  : 18");
             PrintString(sbData, 0);
-
-            PrintFeedline(2);
+            
             PrintCutpaper(0);
             SetClean();
             
