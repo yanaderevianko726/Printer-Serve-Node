@@ -92,53 +92,32 @@ var edgePrintReceipt3 = edge.func(function () {/*
             r = SetPrintport(sPort, iBaudrate);
 
             s = SetUsbportauto();
-
             m_iInit = SetInit();
-            if (m_iInit == 0)
-            {
-                b = SetCommandmode(3);
-            }
 
-            StringBuilder sbData = new StringBuilder("");
+            SetClean();
             SetCommandmode(3);
+            PrintFeedline(2);
 
+            SetSizetext(1, 1);
             SetAlignment(0);
             SetBold(1);
-            SetSizetext(2, 2);
 
-            sbData = new StringBuilder("Downer Defence");
-            SetLinespace(5);
-            PrintString(sbData, 0);
+            PrintString(new StringBuilder("Downer Defence"), 0);
+            PrintString(new StringBuilder("Gallipoli Barracks"), 0);
+            PrintFeedline(1);
 
-            SetSizetext(2, 2);     
-            sbData = new StringBuilder("Gallipoli Barracks");
-            SetLinespace(8);
-            PrintString(sbData, 0);
-
-            SetSizetext(1, 1);      
-            sbData = new StringBuilder("EMOS-3");
-            SetLinespace(12);
-            PrintString(sbData, 0);
+            SetSizetext(1, 1); 
+            PrintString(new StringBuilder("EMOS-3"), 0);
+            PrintFeedline(1);
 
             SetBold(0);
             SetSizetext(0, 0);
 
-            sbData = new StringBuilder("Full Name      : Justin Dean");
-            SetLinespace(3);
-            PrintString(sbData, 0);
-
-            sbData = new StringBuilder("PM Key         : 1234");
-            SetLinespace(3);
-            PrintString(sbData, 0);
-
-            sbData = new StringBuilder("Locker Number  : 18");
-            SetLinespace(3);
-            PrintString(sbData, 0);
-
+            PrintString(new StringBuilder("Full Name      : Justin Dean"), 0);
+            PrintString(new StringBuilder("PM Key         : 1234"), 0);
+            PrintString(new StringBuilder("Locker Number  : 18"), 0);
             PrintFeedline(2);
-            PrintCutpaper(0);
-            SetClean();
-            
+
             return 1;
         }
     }
