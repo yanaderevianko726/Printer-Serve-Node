@@ -79,46 +79,31 @@ var edgePrintReceipt5 = edge.func(function () {/*
 
             SetAlignment(0);
             SetBold(1);
-            SetSizetext(2, 2);      
+            SetSizetext(3, 3);
+
             sbData = new StringBuilder("Downer Defence");
             PrintString(sbData, 0);
 
-            SetAlignment(0);
-            SetBold(1);
             SetSizetext(2, 2);     
             sbData = new StringBuilder("Gallipoli Barracks");
             PrintString(sbData, 0);
 
-            SetAlignment(0);
-            SetBold(1);
             SetSizetext(1, 1);      
             sbData = new StringBuilder("EMOS-3");
             PrintString(sbData, 0);
 
-            SetAlignment(0);
             SetBold(0);
             SetSizetext(0, 0);
+
             sbData = new StringBuilder("Full Name      : Justin Dean");
             PrintString(sbData, 0);
 
-            SetAlignment(0);
-            SetBold(0);
-            SetSizetext(0, 0);
             sbData = new StringBuilder("PM Key         : 1234");
             PrintString(sbData, 0);
 
-            SetAlignment(0);
-            SetBold(0);
-            SetSizetext(0, 0);
             sbData = new StringBuilder("Locker Number  : 18");
             PrintString(sbData, 0);
 
-            SetAlignment(0);
-            SetBold(0);
-            SetSizetext(0, 0);
-            sbData = new StringBuilder("Locker Number  : 18");
-            PrintString(sbData, 0);
-            
             PrintCutpaper(0);
             SetClean();
             
