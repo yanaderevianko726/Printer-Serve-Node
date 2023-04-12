@@ -96,21 +96,20 @@ var edgePrintReceipt3 = edge.func(function () {/*
 
             SetClean();
             SetCommandmode(3);
-            PrintFeedline(2);
+               
+            PrintString(new StringBuilder("   "), 0);    
+            PrintString(new StringBuilder("   "), 0);  
 
             SetAlignment(0);
-            SetBold(1);
-            SetSizetext(1, 1); 
+            SetBold(1); 
 
             PrintString(new StringBuilder("Gallipoli Barracks"), 0);
             PrintFeedline(1);
             
-            SetSizetext(0, 0); 
             PrintString(new StringBuilder("EMOS-3"), 0);
             PrintFeedline(1);
 
             SetBold(0);
-            SetSizetext(0, 0);
 
             PrintString(new StringBuilder("PMKEY                 : 1234"), 0);
             PrintString(new StringBuilder("Rank                  : Pvt"), 0);
@@ -150,8 +149,9 @@ var edgePrintReceipt3 = edge.func(function () {/*
             PrintString(new StringBuilder("Accommodation After Hours Key Safe Lockers, "), 0);          
             PrintString(new StringBuilder("located opposite Downer accommodation office"), 0);        
             PrintString(new StringBuilder("within the Monash Centre (Bld F079) Duty Officer"), 0);    
-            PrintString(new StringBuilder("Phone: 0438 710 603"), 0);
-            PrintFeedline(2);
+            PrintString(new StringBuilder("Phone: 0438 710 603"), 0);    
+            PrintString(new StringBuilder("   "), 0);    
+            PrintString(new StringBuilder("   "), 0);
 
             return 1;
         }
