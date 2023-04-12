@@ -109,7 +109,7 @@ var edgePrintReceipt5 = edge.func(function () {/*
             PrintString(new StringBuilder("EMOS-5"), 0);
             PrintFeedline(1);
 
-            SetBold(1);
+            SetBold(0);
 
             PrintString(new StringBuilder("PMKEY                 : 1234"), 0);
             PrintString(new StringBuilder("Rank                  : Pvt"), 0);
@@ -152,8 +152,8 @@ var edgePrintReceipt5 = edge.func(function () {/*
             PrintString(new StringBuilder("Phone: 0438 710 603"), 0);    
             PrintString(new StringBuilder("   "), 0);    
             PrintString(new StringBuilder("   "), 0);
-
-            SetBold(1);
+            
+            SetClean();
 
             return 1;
         }
