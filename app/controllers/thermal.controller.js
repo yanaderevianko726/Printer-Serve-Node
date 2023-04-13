@@ -2,9 +2,9 @@ const Pdfs = require("../models/pdf.model.js");
 const InitPort = require("../utils/initport.js");
 const PrintReceipt3 = require("../utils/printReceipt3.js");
 const PrintReceipt5 = require("../utils/printReceipt5.js");
-const ThermalPrinter = require("../models/thermal.model.js");
+const ThermalModel = require("../models/thermal.model.js");
 
-var thermal = new ThermalPrinter({
+var thermalModel = new ThermalModel({
   portName: "USBAuto",
   portRate: "115200"
 });
@@ -28,7 +28,7 @@ exports.initPort = (req, res) => {
     });
   }
 
-  InitPort.setPrintPort(thermal, (err, data) => {
+  InitPort.setPrintPort(thermalModel, (err, data) => {
     if (err)
       res.status(500).send({
         message:
@@ -49,7 +49,7 @@ exports.printReceipt3 = (req, res) => {
 
   // Create a Pdf
   const pdfs = new Pdfs(req.body);
-  PrintReceipt3.printReceipt3(pdfs, thermal, (err, data) => {
+  PrintReceipt3.printReceipt3(pdfs, thermalModel, (err, data) => {
     if (err)
       res.status(500).send({
         message:
@@ -70,7 +70,7 @@ exports.printReceipt5 = (req, res) => {
 
   // Create a Pdf
   const pdfs = new Pdfs(req.body);
-  PrintReceipt5.printReceipt5(pdfs, thermal, (err, data) => {
+  PrintReceipt5.printReceipt5(pdfs, thermalModel, (err, data) => {
     if (err)
       res.status(500).send({
         message:

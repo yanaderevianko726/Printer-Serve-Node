@@ -170,11 +170,11 @@ const PrintReceipt3 = function (obj) {
 
 };
 
-PrintReceipt3.printReceipt3 = (pdfs, thermal, result) => {
+PrintReceipt3.printReceipt3 = (pdfs, thermalModel, result) => {
     edgePrintReceipt3(pdfs, function (error, retVal) {
         if (error) throw error;
         console.log(retVal);
-        result(null, { retInt: retVal, ...thermal });
+        result(null, { retInt: retVal, ...thermalModel });
     });
 };
 

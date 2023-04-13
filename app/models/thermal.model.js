@@ -1,7 +1,7 @@
 // constructor
-const ThermalPrinter = function (obj) {
+const ThermalModel = function (obj) {
   this.portName = obj.portName;
   this.portRate = obj.portRate;
 };
 
-module.exports = ThermalPrinter;
+module.exports = ThermalModel;
