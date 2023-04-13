@@ -16,7 +16,7 @@ exports.initController = (req, res) => {
       message: "Content can not be empty!"
     });
   }
-  res.send("Welcome");
+  res.send("Welcome to thermal printer");
 };
 
 // Create and Save a new Pdf
