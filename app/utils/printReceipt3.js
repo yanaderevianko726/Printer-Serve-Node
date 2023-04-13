@@ -78,6 +78,9 @@ var edgePrintReceipt3 = edge.func(function () {/*
         [DllImport("Msprintsdk.dll", EntryPoint = "SetLinespace", CharSet = CharSet.Ansi)]
         public static extern int SetLinespace(int iLinespace);
 
+        [DllImport("Msprintsdk.dll", EntryPoint = "PrintDiskimgfile", CharSet = CharSet.Ansi)]
+        public static extern int PrintDiskimgfile(StringBuilder strData);
+
         string cboPort = "USBAuto";
         string cboBandrate = "115200";
         int m_iInit = -1, r = -1, s = -1, b = -1;
@@ -98,7 +101,10 @@ var edgePrintReceipt3 = edge.func(function () {/*
             SetCommandmode(3);
                
             PrintString(new StringBuilder("   "), 0);    
-            PrintString(new StringBuilder("   "), 0);  
+            PrintString(new StringBuilder("   "), 0);   
+
+            PrintDiskimgfile(new StringBuilder("C:\\downer_logo.bmp"));
+            PrintFeedline(1);
 
             SetAlignment(0);
             SetBold(1); 
