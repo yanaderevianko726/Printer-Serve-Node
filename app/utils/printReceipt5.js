@@ -149,9 +149,8 @@ var edgePrintReceipt5 = edge.func(function () {/*
             PrintString(new StringBuilder("Accommodation After Hours Key Safe Lockers, "), 0);          
             PrintString(new StringBuilder("located opposite Downer accommodation office"), 0);        
             PrintString(new StringBuilder("within the Monash Centre (Bld F079) Duty Officer"), 0);    
-            PrintString(new StringBuilder("Phone: 0438 710 603"), 0);    
-            PrintString(new StringBuilder("   "), 0);    
-            PrintString(new StringBuilder("   "), 0);
+            PrintString(new StringBuilder("Phone: 0438 710 603"), 0);
+            PrintFeedline(5);           
             
             SetClean();
 
