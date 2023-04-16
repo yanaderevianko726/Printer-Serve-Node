@@ -36,8 +36,8 @@ var edgeWriteRfid = edge.func(function () {/*
 
     public class Startup
     {
-        [DllImport("Msprintsdk.dll", EntryPoint = "SetInit", CharSet = CharSet.Ansi)]
-        public static extern int SetInit();
+        [DllImport("K720_Dll.dll", EntryPoint = "K720_CommOpenWithBaud", CharSet = CharSet.Ansi)]
+        public static extern void K720_CommOpenWithBaud(char Port, int _data);
 
         string cboPort = "COM1";
         string cboBandrate = "9600";
@@ -48,9 +48,7 @@ var edgeWriteRfid = edge.func(function () {/*
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
 
-            StringBuilder sPort = new StringBuilder(cboPort, cboPort.Length);
-            int iBaudrate = int.Parse(cboBandrate);
-            m_iInit = SetInit();
+            K720_CommOpenWithBaud("9600, n, 8, 1", 9600);
 
             return 1;
         }
