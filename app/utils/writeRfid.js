@@ -1,6 +1,5 @@
-var SerialPort = require("serialport");
-var port = "COM1";
-var serialPort = new SerialPort(port, {
+var SerialPort = require("serialport").SerialPort
+var comPort1 = new SerialPort('COM1', {
     baudRate: 9600
 });
 
@@ -9,18 +8,21 @@ const WriteRFID = function (obj) {
 
 };
 
-WriteRFID.writeRfidCard = (pdfs, rfidModel, result) => {
-    serialPort.on("open", function () {
+WriteRFID.openComPort = (pdfs, rfidModel, result) => {
+    comPort1.on("open", function () {
         console.log("-- Com1 opened with 9600 baudRate--");
-        serialPort.write('023030000141500312', function (err) {
-            if (err) {
-                result(null, { retInt: 1, ...rfidModel });
-            }
-        });
-        serialPort.on("data", function (data) {
-            console.log("Data received: " + data);
-            result(null, { retInt: data, ...rfidModel });
-        });
+    });
+};
+
+WriteRFID.writeRfidCard = (pdfs, rfidModel, result) => {
+    comPort1.write('023030000141500312', function (err) {
+        if (err) {
+            result(null, { retInt: 1, ...rfidModel });
+        }
+    });
+    comPort1.on("data", function (data) {
+        console.log("Data received: " + data);
+        result(null, { retInt: data, ...rfidModel });
     });
 };
 

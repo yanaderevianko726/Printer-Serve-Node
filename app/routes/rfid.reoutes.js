@@ -3,6 +3,7 @@ module.exports = app => {
   const rfidController = require("../controllers/rfid.controller.js");
 
   router.get("/", rfidController.initController);
+  router.post("/openComport", rfidController.openComPort);
   router.post("/writteRfid", rfidController.writteRfid);
 
   app.use('/api/rfid', router);
