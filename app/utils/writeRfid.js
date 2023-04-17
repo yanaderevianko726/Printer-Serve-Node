@@ -1,6 +1,7 @@
-var ffi = require('ffi-napi');
-var ndpi = new ffi.Library('K720_Dll.dll', {
-    K720_CommOpen: ['void', ['char']],
+var SerialPort = require("serialport");
+var port = "COM1";
+var serialPort = new SerialPort(port, {
+    baudRate: 9600
 });
 
 // constructor
@@ -9,13 +10,18 @@ const WriteRFID = function (obj) {
 };
 
 WriteRFID.writeRfidCard = (pdfs, rfidModel, result) => {
-    ndpi.K720_CommOpen();
-    result(null, { retInt: 0, ...rfidModel });
-    // WriteCrapVB('1234', function (error, retVal) {
-    //     if (error) throw error;
-    //     console.log(retVal);
-    //     result(null, { retInt: retVal, ...rfidModel });
-    // });
+    serialPort.on("open", function () {
+        console.log("-- Com1 opened with 9600 baudRate--");
+        serialPort.write('023030000141500312', function (err) {
+            if (err) {
+                result(null, { retInt: 1, ...rfidModel });
+            }
+        });
+        serialPort.on("data", function (data) {
+            console.log("Data received: " + data);
+            result(null, { retInt: data, ...rfidModel });
+        });
+    });
 };
 
 module.exports = WriteRFID;
