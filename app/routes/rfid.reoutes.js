@@ -4,7 +4,9 @@ module.exports = app => {
 
   router.get("/", rfidController.initController);
   router.post("/openComport", rfidController.openComPort);
-  router.post("/writteRfid", rfidController.writteRfid);
+  router.post("/sendCardToReadPos", rfidController.sendCardToReadPos);
+  router.post("/sendCardToTakePos", rfidController.sendCardToTakePos);
+  router.post("/sendCardToOutPos", rfidController.sendCardToOutPos);
 
   app.use('/api/rfid', router);
 };
