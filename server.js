@@ -23,6 +23,7 @@ app.get("/", (req, res) => {
 
 require("./app/routes/thermal.routes.js")(app);
 require("./app/routes/rfid.reoutes.js")(app);
+require("./app/routes/usbrfid.routes.js")(app);
 require("./app/routes/user.routes.js")(app);
 
 app.listen(PORT, () => {
