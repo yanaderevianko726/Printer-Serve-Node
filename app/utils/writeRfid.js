@@ -3,12 +3,13 @@ const { SerialPort } = require('serialport')
 let cmdCheckCard = Buffer.from([0x02, 0x30, 0x30, 0x00, 0x02, 0x41, 0x50, 0x03, 0x12]);
 let cmdSendCardRead = Buffer.from([0x02, 0x30, 0x30, 0x00, 0x03, 0x46, 0x43, 0x37, 0x03, 0x30]);
 let cmdSendCardTake = Buffer.from([0x02, 0x30, 0x30, 0x00, 0x02, 0x41, 0x50, 0x03, 0x12]);
-let cmdSendCardOut = Buffer.from([0x02, 0x30, 0x30, 0x00, 0x02, 0x41, 0x50, 0x03, 0x12]);
+let cmdSendCardOut = Buffer.from([0x02, 0x30, 0x30, 0x00, 0x03, 0x46, 0x43, 0x30, 0x03, 0x37]);
 
 let resActive = Buffer.from([0x06, 0x30, 0x30]);
 let cmdCheck = Buffer.from([0x05, 0x30, 0x30]);
 let resCardInStart = Buffer.from([0x02, 0x30, 0x30, 0x00, 0x06, 0x53, 0x46, 0x30, 0x30, 0x30, 0x30, 0x03, 0x12]);
 let resCardInRead = Buffer.from([0x02, 0x30, 0x30, 0x00, 0x06, 0x53, 0x46, 0x30, 0x30, 0x30, 0x33, 0x03, 0x11]);
+var currentRes = Buffer.from([0x00]);
 
 var comPort1 = new SerialPort({
     path: 'COM1',
@@ -17,18 +18,20 @@ var comPort1 = new SerialPort({
 });
 comPort1.on('data', function (data) {
     console.log('--- Com1 received data:', data)
-    if (data == resActive) {
+    currentRes = data;
+    if (currentRes == resActive) {
         comPort1.write(cmdCheck, function (err) {
             if (!err) {
-                console.log("-- Com1 wrote with " + cmdSendCardRead + " ---");
+                console.log("-- Com1 wrote with " + cmdCheck + " ---");
             }
         });
-    }
-    if (data == resCardInStart) {
+    } else if (currentRes != resCardInStart) {
         console.log('--- Card is in start position ---')
-    }
-    if (data == resCardInRead) {
-        console.log('--- Card is in read position ---')
+        comPort1.write(cmdCheckCard, function (err) {
+            if (!err) {
+                console.log("-- Com1 wrote with " + cmdCheckCard + " ---");
+            }
+        });
     }
 });
 
