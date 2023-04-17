@@ -9,6 +9,23 @@ exports.initController = (req, res) => {
   res.send("Welcome to rfid reader module.");
 };
 
+exports.readInfo = (req, res) => {
+  if (!req.body) {
+    res.status(400).send({
+      message: "Content can not be empty!"
+    });
+  }
+
+  UsbRfid.readInfo(req.body, (err, data) => {
+    if (err)
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while creating the Pdf."
+      });
+    else res.send(data);
+  });
+};
+
 exports.writeUserPmKey = (req, res) => {
   if (!req.body) {
     res.status(400).send({

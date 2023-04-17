@@ -34,11 +34,19 @@ const UsbRfid = function (obj) {
 
 };
 
-UsbRfid.writePmKey = (info, result) => {
-    edgeWritePmKey(info, function (error, retVal) {
+UsbRfid.readInfo = (reqBody, result) => {
+    edgeWritePmKey(reqBody, function (error, retVal) {
         if (error) throw error;
         console.log(retVal);
-        result(null, { retInt: retVal, ...info });
+        result(null, { retInt: retVal, ...reqBody });
+    });
+};
+
+UsbRfid.writePmKey = (reqBody, result) => {
+    edgeWritePmKey(reqBody, function (error, retVal) {
+        if (error) throw error;
+        console.log(retVal);
+        result(null, { retInt: retVal, ...reqBody });
     });
 };
 
