@@ -21,14 +21,11 @@ var edgeReadInfo = edge.func(function () {/*
         [DllImport("USB.dll", EntryPoint = "GetSerNum", CharSet = CharSet.Ansi)]
         public static extern int GetSerNum(StringBuilder buffer);
 
-        string strBuffer = "Buffer";
-        int r = -1;
-
         public async Task<object> Invoke(dynamic input)
         {
-            StringBuilder buffer = new StringBuilder(strBuffer, strBuffer.Length);
-            r = GetSerNum(buffer);
-            return r;
+            byte[] buffer = new byte[9];
+            int nRet = GetSerNum(buffer);
+            return nRet;
         }
     }
 */});
