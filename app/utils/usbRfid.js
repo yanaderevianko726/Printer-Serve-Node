@@ -18,7 +18,7 @@ var edgeReadInfo = edge.func(function () {/*
 
     public class Startup
     {
-        [DllImport("USB.dll", EntryPoint = "GetSerNum", CharSet = CharSet.Ansi)]
+        [DllImport("function.dll", EntryPoint = "GetSerNum", CharSet = CharSet.Ansi)]
         public static extern int GetSerNum(byte[] buffer);
 
         public async Task<object> Invoke(dynamic input)
@@ -48,7 +48,7 @@ var edgeWritePmKey = edge.func(function () {/*
 
     public class Startup
     {
-        [DllImport("USB.dll", EntryPoint = "GetSerNum", CharSet = CharSet.Ansi)]
+        [DllImport("function.dll", EntryPoint = "GetSerNum", CharSet = CharSet.Ansi)]
         public static extern int GetSerNum(StringBuilder buffer);
 
         int m_iInit = -1;
