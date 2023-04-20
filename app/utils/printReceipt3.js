@@ -17,16 +17,26 @@ var edgePrintReceipt3 = edge.func(function () {/*
 
     public class ClsPdf
     {
-        public string fullName = "";
+        public string firstName = "";
+        public string lastName = "";
         public string pmKey = "";
+        public string rank = "";
+        public string roomKey = "";
+        public string roomNum = "";
+        public string mobile = "";
         public string lockerNumber = "";
         public string bookType = "";
         public string startedAt = "";
         public string endAt = "";
 
         public void initWithDynamic(dynamic input){
-            fullName = input.fullName;
+            firstName = input.firstName;
+            lastName = input.lastName;
             pmKey = input.pmKey;
+            rank = input.rank;
+            roomKey = input.roomKey;
+            roomNum = input.roomNum;
+            mobile = input.mobile;
             lockerNumber = input.lockerNumber;
             bookType = input.bookType;
             startedAt = input.startedAt;
@@ -117,17 +127,50 @@ var edgePrintReceipt3 = edge.func(function () {/*
 
             SetBold(0);
 
-            PrintString(new StringBuilder("PMKEY                 : 1234"), 0);
-            PrintString(new StringBuilder("Rank                  : Pvt"), 0);
-            PrintString(new StringBuilder("First Name            : Justin"), 0);
-            PrintString(new StringBuilder("Last Name             : Dean"), 0);
-            PrintString(new StringBuilder("Arrival Date          : Sat, 12 April 2023"), 0);
-            PrintString(new StringBuilder("Departure Date        : Sat, 23 April 2023"), 0);
-            PrintString(new StringBuilder("Building              : 1"), 0);
-            PrintString(new StringBuilder("Room                  : 1"), 0);
-            PrintString(new StringBuilder("Contact Number        : 0405 700 455"), 0);
-            PrintString(new StringBuilder("Vehicle Registration  : EEEEEE"), 0);
-            PrintString(new StringBuilder("Locker Number         : 18"), 0);
+            StringBuilder sbPrint = new StringBuilder("PMKEY                 : ");
+            sbPrint.Append(clsPdf.pmKey);
+            PrintString(sbPrint, 0);
+
+            sbPrint = new StringBuilder("Rank                  : ");
+            sbPrint.Append(clsPdf.rank);
+            PrintString(sbPrint, 0);
+
+            sbPrint = new StringBuilder("First Name            : ");
+            sbPrint.Append(clsPdf.firstName);
+            PrintString(sbPrint, 0);
+
+            sbPrint = new StringBuilder("Last Name             : ");
+            sbPrint.Append(clsPdf.lastName);
+            PrintString(sbPrint, 0);
+
+            sbPrint = new StringBuilder("Arrival Date          : ");
+            sbPrint.Append(clsPdf.startedAt);
+            PrintString(sbPrint, 0);
+
+            sbPrint = new StringBuilder("Departure Date        : ");
+            sbPrint.Append(clsPdf.endAt);
+            PrintString(sbPrint, 0);
+
+            sbPrint = new StringBuilder("Building              : ");
+            sbPrint.Append(clsPdf.roomKey);
+            PrintString(sbPrint, 0);
+
+            sbPrint = new StringBuilder("Room                  : ");
+            sbPrint.Append(clsPdf.roomNum);
+            PrintString(sbPrint, 0);
+
+            sbPrint = new StringBuilder("Contact Number        : ");
+            sbPrint.Append(clsPdf.mobile);
+            PrintString(sbPrint, 0);
+
+            sbPrint = new StringBuilder("Vehicle Registration  : EEEEEE");
+            sbPrint.Append(clsPdf.mobile);
+            PrintString(sbPrint, 0);
+
+            sbPrint = new StringBuilder("Locker Number         : ");
+            sbPrint.Append(clsPdf.lockerNumber);
+            PrintString(sbPrint, 0);
+
             PrintFeedline(1);
             PrintString(new StringBuilder("Use last 4 digits of PMKEY to access locker"), 0);
             PrintString(new StringBuilder("****"), 0);

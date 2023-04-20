@@ -1,7 +1,12 @@
 // constructor
 const Pdfs = function (pdfs) {
-  this.fullName = pdfs.fullName;
+  this.firstName = pdfs.firstName;
+  this.lastName = pdfs.lastName;
   this.pmKey = pdfs.pmKey;
+  this.rank = pdfs.rank;
+  this.roomKey = pdfs.roomKey;
+  this.roomNum = pdfs.roomNum;
+  this.mobile = pdfs.mobile;
   this.lockerNumber = pdfs.lockerNumber;
   this.bookType = pdfs.bookType;
   this.startedAt = pdfs.startedAt;
