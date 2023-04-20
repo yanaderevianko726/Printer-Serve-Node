@@ -165,10 +165,6 @@ var edgePrintReceipt5 = edge.func(function () {/*
 
             sbPrint = new StringBuilder("Vehicle Registration  : EEEEEE");
             PrintString(sbPrint, 0);
-
-            sbPrint = new StringBuilder("Locker Number         : ");
-            sbPrint.Append(clsPdf.lockerNumber);
-            PrintString(sbPrint, 0);
             
             PrintFeedline(1);
             PrintString(new StringBuilder("Use last 4 digits of PMKEY to access locker"), 0);
