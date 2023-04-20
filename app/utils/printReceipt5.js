@@ -167,9 +167,6 @@ var edgePrintReceipt5 = edge.func(function () {/*
             PrintString(sbPrint, 0);
             
             PrintFeedline(1);
-            PrintString(new StringBuilder("Use last 4 digits of PMKEY to access locker"), 0);
-            PrintString(new StringBuilder("****"), 0);
-            PrintFeedline(1);
             PrintString(new StringBuilder("By Accepting the issued key to the assigned "), 0);
             PrintString(new StringBuilder("room, the member acknowledges:"), 0);
             PrintFeedline(1);
