@@ -164,7 +164,6 @@ var edgePrintReceipt5 = edge.func(function () {/*
             PrintString(sbPrint, 0);
 
             sbPrint = new StringBuilder("Vehicle Registration  : EEEEEE");
-            sbPrint.Append(clsPdf.mobile);
             PrintString(sbPrint, 0);
 
             sbPrint = new StringBuilder("Locker Number         : ");
