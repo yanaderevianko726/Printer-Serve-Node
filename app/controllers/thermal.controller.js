@@ -49,6 +49,7 @@ exports.printReceipt3 = (req, res) => {
 
   // Create a Pdf
   const pdfs = new Pdfs(req.body);
+  console.log(pdfs);
   PrintReceipt3.printReceipt3(pdfs, thermalModel, (err, data) => {
     if (err)
       res.status(500).send({
