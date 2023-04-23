@@ -110,7 +110,7 @@ var edgeWritePmKey = edge.func(function () {/*
 
         public async Task<object> Invoke(dynamic input)
         {
-            string writteData = input.pmKey;
+            string writteData = input.keyData;
             byte mode = 0x00;
             byte blk_add = Convert.ToByte("04", 16);
 
