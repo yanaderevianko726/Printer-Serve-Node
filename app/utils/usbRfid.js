@@ -114,6 +114,12 @@ var edgeWritePmKey = edge.func(function () {/*
                 blk_count = 12;
             }
 
+            string[] resArr = new string[blk_count+4];
+            resArr[0] = writteData;
+            resArr[1] = hexString;
+            resArr[2] = hexString.Length.ToString();
+            resArr[3] = blk_count.ToString();
+
             for (int i = 0; i < blk_count; i++) 
             {
                 byte blk_add = Convert.ToByte(blk_list[i], 16);
@@ -128,6 +134,7 @@ var edgeWritePmKey = edge.func(function () {/*
                     sl = hexString.Length - 32 * i;
                     subHexString = hexString.Substring(32 * i, sl);
                 }
+                resArr[i+4] = subHexString;
 
                 byte[] buffer = new byte[sl];
                 bufferStr = formatStr(subHexString, -1);
@@ -136,7 +143,6 @@ var edgeWritePmKey = edge.func(function () {/*
                 int nRet = UL_HLWrite(mode, blk_add, snr, buffer);
             }
 
-            string[] resArr = new string[4]{ writteData, hexString.Length.ToString(), blk_count.ToString(), hexString };
             return resArr;
         }
     }
