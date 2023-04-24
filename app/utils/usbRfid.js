@@ -140,12 +140,11 @@ UsbRfid.readInfo = (reqBody, result) => {
 };
 
 UsbRfid.writePmKey = (rfidKey, result) => { 
-    result(null, { retInt: 0, ...rfidKey }); 
-    // edgeWritePmKey(rfidKey, function (error, retVal) {
-    //     if (error) throw error;
-    //     console.log(retVal);    
-    //     result(null, { retInt: retVal, ...rfidKey });
-    // });
+    edgeWritePmKey(rfidKey, function (error, retVal) {
+        if (error) throw error;
+        console.log(retVal);    
+        result(null, { retInt: retVal, ...rfidKey });
+    });
 };
 
 module.exports = UsbRfid;

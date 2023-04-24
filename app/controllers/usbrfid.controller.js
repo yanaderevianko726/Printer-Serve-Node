@@ -34,8 +34,7 @@ exports.writeUserPmKey = (req, res) => {
     });
   }
 
-  const rfidKey = new RfidKey(req.body);     
-  console.log(rfidKey);
+  const rfidKey = new RfidKey(req.body); 
   UsbRfid.writePmKey(rfidKey, (err, data) => {
     if (err)
       res.status(500).send({
