@@ -1,6 +1,6 @@
 // constructor
-const RfidKey = function (pdfs) {
-  this.keyData = pdfs.keyData;
+const RfidKey = function (rfidKey) {
+  this.keyData = rfidKey.keyData;
 };
 
-module.exports = Pdfs;
+module.exports = RfidKey;
