@@ -139,12 +139,12 @@ UsbRfid.readInfo = (reqBody, result) => {
     });
 };
 
-UsbRfid.writePmKey = (reqBody, result) => { 
-    result(null, { retInt: 0, ...reqBody }); 
-    // edgeWritePmKey(reqBody, function (error, retVal) {
+UsbRfid.writePmKey = (rfidKey, result) => { 
+    result(null, { retInt: 0, ...rfidKey }); 
+    // edgeWritePmKey(rfidKey, function (error, retVal) {
     //     if (error) throw error;
     //     console.log(retVal);    
-    //     result(null, { retInt: retVal, ...reqBody });
+    //     result(null, { retInt: retVal, ...rfidKey });
     // });
 };
 
