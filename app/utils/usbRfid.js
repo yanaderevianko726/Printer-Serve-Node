@@ -94,34 +94,50 @@ var edgeWritePmKey = edge.func(function () {/*
             }
         }
 
-        private string showData(byte[] data, int s, int e)
-        {
-            string txt = "";
-            for (int i = 0; i < e; i++) {
-                if (data[s + i] < 0)
-                    data[s + i] = Convert.ToByte(Convert.ToInt32(data[s + i]) + 256);
-            }
-
-            for (int i = 0; i < e; i++) {
-                txt += data[s + i].ToString("X2")+" ";
-            }
-            return txt;
-        }
-
         public async Task<object> Invoke(dynamic input)
         {
             string writteData = input.keyData;
+
+            byte[] bytesWritten = Encoding.Default.GetBytes(writteData); 
+            string hexString = BitConverter.ToString(bytesWritten);
+            hexString = hexString.Replace("-", "");
+
             byte mode = 0x00;
-            byte blk_add = Convert.ToByte("04", 16);
-
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
-            byte[] buffer = new byte[4];
 
-            string bufferStr = formatStr(writteData, -1);
-            convertStr(buffer, bufferStr, 16);
+            string[] blk_list = new string[12]{ "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15" };
+            int blk_count = hexString.Length / 32;
+            if(hexString.Length % 32 > 0){
+                blk_count++;
+            }
+            if(blk_count > 12){
+                blk_count = 12;
+            }
 
-            int nRet = UL_HLWrite(mode, blk_add, snr, buffer);
-            return nRet;
+            for (int i = 0; i < blk_count; i++) 
+            {
+                byte blk_add = Convert.ToByte(blk_list[i], 16);
+
+                string subHexString = "";
+                string bufferStr = "";
+                int sl = 32;
+
+                if(i < blk_count - 1){
+                    subHexString = hexString.Substring(32 * i, 32);
+                }else{
+                    sl = hexString.Length - 32 * i;
+                    subHexString = hexString.Substring(32 * i, sl);
+                }
+
+                byte[] buffer = new byte[sl];
+                bufferStr = formatStr(subHexString, -1);
+                convertStr(buffer, bufferStr, sl / 2);
+
+                int nRet = UL_HLWrite(mode, blk_add, snr, buffer);
+            }
+
+            string[] resArr = new string[4]{ writteData, hexString.Length.ToString(), blk_count.ToString(), hexString };
+            return resArr;
         }
     }
 */});
