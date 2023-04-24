@@ -121,15 +121,7 @@ var edgeWritePmKey = edge.func(function () {/*
             convertStr(buffer, bufferStr, 4);
 
             int nRet = UL_HLWrite(mode, blk_add, snr, buffer);
-            string cardNum = "";
-
-            if (nRet != 0) {
-                return "";
-            }
-            else {
-                cardNum = showData(snr,0,7);
-                return cardNum;
-            }
+            return nRet;
         }
     }
 */});
@@ -147,12 +139,13 @@ UsbRfid.readInfo = (reqBody, result) => {
     });
 };
 
-UsbRfid.writePmKey = (reqBody, result) => {
-    edgeWritePmKey(reqBody, function (error, retVal) {
-        if (error) throw error;
-        console.log(retVal);
-        result(null, { retInt: retVal, ...reqBody });
-    });
+UsbRfid.writePmKey = (reqBody, result) => { 
+    result(null, { retInt: 0, ...reqBody }); 
+    // edgeWritePmKey(reqBody, function (error, retVal) {
+    //     if (error) throw error;
+    //     console.log(retVal);    
+    //     result(null, { retInt: retVal, ...reqBody });
+    // });
 };
 
 module.exports = UsbRfid;

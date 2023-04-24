@@ -1,4 +1,5 @@
 const UsbRfid = require("../utils/usbRfid.js");
+const RfidKey = require("../models/rfidKey.model.js");
 
 exports.initController = (req, res) => {
   if (!req.body) {
@@ -33,7 +34,9 @@ exports.writeUserPmKey = (req, res) => {
     });
   }
 
-  UsbRfid.writePmKey(req.body, (err, data) => {
+  RfidKey rfidKey = new RfidKey();      
+  console.log(rfidKey);
+  UsbRfid.writePmKey(rfidKey, (err, data) => {
     if (err)
       res.status(500).send({
         message:
