@@ -118,7 +118,7 @@ var edgeWritePmKey = edge.func(function () {/*
             byte[] buffer = new byte[4];
 
             string bufferStr = formatStr(writteData, -1);
-            convertStr(buffer, bufferStr, 4);
+            convertStr(buffer, bufferStr, 16);
 
             int nRet = UL_HLWrite(mode, blk_add, snr, buffer);
             return nRet;
