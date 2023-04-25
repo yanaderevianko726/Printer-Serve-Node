@@ -107,7 +107,7 @@ var edgeWritePmKey = edge.func(function () {/*
         {
             string writteData = input.keyData;
 
-            int Res = PMSifRegister(lic_code, app_name);
+            // int Res = PMSifRegister(lic_code, app_name);
             // PMSifEncodeKcdLcl(Cmd, writteData, false, txtSysID.Text, txtSysFName.Text, txtSysLName.Text);
 
             byte[] bytesWritten = Encoding.Default.GetBytes(writteData); 
