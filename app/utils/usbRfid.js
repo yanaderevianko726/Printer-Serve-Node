@@ -75,6 +75,15 @@ var edgeWritePmKey = edge.func(function () {/*
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
+        [DllImport("pmsif.dll")]
+        public static extern int PMSifRegister(string szLicense, string szAppl);
+
+        [DllImport("pmsif.dll")]
+        public static extern int PMSifEncodeKcdLcl(byte ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+
+        string lic_code = "BBC7.6027.91B3.3824.8E5D";
+        string app_name = "Downer_Defence";
+
         private string formatStr(string str, int num_blk)
         {            
             string tmp=Regex.Replace(str,"[^a-fA-F0-9]","");
@@ -97,6 +106,9 @@ var edgeWritePmKey = edge.func(function () {/*
         public async Task<object> Invoke(dynamic input)
         {
             string writteData = input.keyData;
+
+            int Res = PMSifRegister(lic_code, app_name);
+            // PMSifEncodeKcdLcl(Cmd, writteData, false, txtSysID.Text, txtSysFName.Text, txtSysLName.Text);
 
             byte[] bytesWritten = Encoding.Default.GetBytes(writteData); 
             string hexString = BitConverter.ToString(bytesWritten);
