@@ -26,6 +26,7 @@ var edgePrintReceipt3 = edge.func(function () {/*
         public string mobile = "";
         public string lockerNumber = "";
         public string bookType = "";
+        public string vehicle = "";
         public string startedAt = "";
         public string endAt = "";
 
@@ -39,6 +40,7 @@ var edgePrintReceipt3 = edge.func(function () {/*
             mobile = input.mobile;
             lockerNumber = input.lockerNumber;
             bookType = input.bookType;
+            vehicle = input.vehicle;
             startedAt = input.startedAt;
             endAt = input.endAt;
         }
@@ -163,7 +165,8 @@ var edgePrintReceipt3 = edge.func(function () {/*
             sbPrint.Append(clsPdf.mobile);
             PrintString(sbPrint, 0);
 
-            sbPrint = new StringBuilder("Vehicle Registration  : EEEEEE");
+            sbPrint = new StringBuilder("Vehicle Registration  : ");
+            sbPrint.Append(clsPdf.vehicle);
             PrintString(sbPrint, 0);
 
             sbPrint = new StringBuilder("Locker Number         : ");
@@ -177,14 +180,14 @@ var edgePrintReceipt3 = edge.func(function () {/*
             PrintString(new StringBuilder("By Accepting the issued key to the assigned "), 0);
             PrintString(new StringBuilder("room, the member acknowledges:"), 0);
             PrintFeedline(1);
-            PrintString(new StringBuilder(" · Awareness of PACMAN Annex 7.4.A Living-in"), 0);            
+            PrintString(new StringBuilder(" - Awareness of PACMAN Annex 7.4.A Living-in"), 0);            
             PrintString(new StringBuilder("   Accommodation"), 0);
-            PrintString(new StringBuilder(" · To immediately report all defects / damaged"), 0);            
+            PrintString(new StringBuilder(" - To immediately report all defects / damaged"), 0);            
             PrintString(new StringBuilder("   to allow neccessary repair and rectification"), 0);
-            PrintString(new StringBuilder(" · Occupant must leave the assigned room neat,"), 0);            
+            PrintString(new StringBuilder(" - Occupant must leave the assigned room neat,"), 0);            
             PrintString(new StringBuilder("   tidy, and in the same condition as at the"), 0);            
             PrintString(new StringBuilder("   starting date"), 0);
-            PrintString(new StringBuilder(" · Please check out prior to 10:00 am on day"), 0);            
+            PrintString(new StringBuilder(" - Please check out prior to 10:00 am on day"), 0);            
             PrintString(new StringBuilder("   of departure"), 0);
             PrintFeedline(1);
             PrintString(new StringBuilder("Business Hours Key Return:"), 0);

@@ -9,6 +9,7 @@ const Pdfs = function (pdfs) {
   this.mobile = pdfs.mobile;
   this.lockerNumber = pdfs.lockerNumber;
   this.bookType = pdfs.bookType;
+  this.vehicle = pdfs.vehicle;
   this.startedAt = pdfs.startedAt;
   this.endAt = pdfs.endAt;
 };

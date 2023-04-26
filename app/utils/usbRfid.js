@@ -119,6 +119,7 @@ var edgeWritePmKey = edge.func(function () {/*
 
             string[] blk_list = new string[12]{ "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15" };
             int blk_count = hexString.Length / 32;
+            
             if(hexString.Length % 32 > 0){
                 blk_count++;
             }
