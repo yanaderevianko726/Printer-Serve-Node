@@ -1,59 +1,5 @@
 var edge = require('edge-js');
 
-var edgeReadInfo = edge.func(function () {/*
-    using System.Threading.Tasks;
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Drawing;
-    using System.Linq;
-    using System.Text;
-    using System.Runtime.InteropServices;
-    using System.IO.Ports;
-    using System.Reflection;
-    using System.Text.RegularExpressions;
-    using System.Runtime.CompilerServices;
-    using System.Diagnostics;
-    using System.Threading;
-
-    public class Startup
-    {
-        [DllImport("function.dll")]
-        public static extern int UL_HLRead(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
-
-        private string showData(byte[] data, int s, int e)
-        {
-            string txt = "";
-            for (int i = 0; i < e; i++) {
-                if (data[s + i] < 0)
-                    data[s + i] = Convert.ToByte(Convert.ToInt32(data[s + i]) + 256);
-            }
-
-            for (int i = 0; i < e; i++) {
-                txt += data[s + i].ToString("X2")+" ";
-            }
-            return txt;
-        }
-
-        public async Task<object> Invoke(dynamic input)
-        {
-            byte mode = (byte)0x00;
-            byte blk_add = Convert.ToByte("04", 16);
-
-            byte[] snr = new byte[7];
-            byte[] buffer = new byte[16];
-
-            int nRet = UL_HLRead(mode, blk_add, snr, buffer);
-            if (nRet != 0) {
-                return "";
-            } else {
-                string bufferData = showData(buffer, 0, 16);
-                return bufferData;
-            }
-        }
-    }
-*/});
-
 var edgeWritePmKey = edge.func(function () {/*
     using System.Threading.Tasks;
     using System;
@@ -208,6 +154,60 @@ var edgeWritePmKey = edge.func(function () {/*
             }
 
             return resArr;
+        }
+    }
+*/});
+
+var edgeReadInfo = edge.func(function () {/*
+    using System.Threading.Tasks;
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Drawing;
+    using System.Linq;
+    using System.Text;
+    using System.Runtime.InteropServices;
+    using System.IO.Ports;
+    using System.Reflection;
+    using System.Text.RegularExpressions;
+    using System.Runtime.CompilerServices;
+    using System.Diagnostics;
+    using System.Threading;
+
+    public class Startup
+    {
+        [DllImport("function.dll")]
+        public static extern int UL_HLRead(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
+
+        private string showData(byte[] data, int s, int e)
+        {
+            string txt = "";
+            for (int i = 0; i < e; i++) {
+                if (data[s + i] < 0)
+                    data[s + i] = Convert.ToByte(Convert.ToInt32(data[s + i]) + 256);
+            }
+
+            for (int i = 0; i < e; i++) {
+                txt += data[s + i].ToString("X2")+" ";
+            }
+            return txt;
+        }
+
+        public async Task<object> Invoke(dynamic input)
+        {
+            byte mode = (byte)0x00;
+            byte blk_add = Convert.ToByte("04", 16);
+
+            byte[] snr = new byte[7];
+            byte[] buffer = new byte[16];
+
+            int nRet = UL_HLRead(mode, blk_add, snr, buffer);
+            if (nRet != 0) {
+                return "";
+            } else {
+                string bufferData = showData(buffer, 0, 16);
+                return bufferData;
+            }
         }
     }
 */});
