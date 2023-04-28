@@ -58,7 +58,7 @@ var edgeWritePmKey = edge.func(function () {/*
         [DllImport("pmsif.dll")]
         public static extern int PMSifEncodeKcdLcl(byte ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
-        string lic_code = "BBC7.6027.91B3.3824.8E5D";
+        string lic_code = "42577125-1379152419-1379283491";
         string app_name = "DESKTOP-MLMP91M";
 
         private string formatStr(string str, int num_blk)
@@ -103,7 +103,8 @@ var edgeWritePmKey = edge.func(function () {/*
             writteData += "*D" + sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
             writteData += "*O" + eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
 
-            // int Res = PMSifRegister(lic_code, app_name);
+            int Res = 0;
+            Res = PMSifRegister(lic_code, app_name);
             // PMSifEncodeKcdLcl(Cmd, writteData, false, txtSysID.Text, txtSysFName.Text, txtSysLName.Text);
 
             byte[] bytesWritten = Encoding.Default.GetBytes(writteData); 
@@ -127,7 +128,7 @@ var edgeWritePmKey = edge.func(function () {/*
             resArr[0] = writteData;
             resArr[1] = hexString;
             resArr[2] = hexString.Length.ToString();
-            resArr[3] = blk_count.ToString();
+            resArr[3] = Res.ToString();
 
             for (int i = 0; i < blk_count; i++) 
             {
