@@ -168,9 +168,9 @@ var edgeWritePmKey = edge.func(function () {/*
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
 
             string[] blk_list = new string[12]{ "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15" };
-            int blk_count = hexString.Length / 32;
+            int blk_count = hexString.Length / 8;
             
-            if(hexString.Length % 32 > 0){
+            if(hexString.Length % 8 > 0){
                 blk_count++;
             }
             if(blk_count > 12){
@@ -189,13 +189,14 @@ var edgeWritePmKey = edge.func(function () {/*
 
                 string subHexString = "";
                 string bufferStr = "";
-                int sl = 32;
+                int sl = 8;
 
                 if(i < blk_count - 1){
-                    subHexString = hexString.Substring(32 * i, 32);
+                    subHexString = hexString.Substring(8 * i, 8);
                 }else{
-                    sl = hexString.Length - 32 * i;
-                    subHexString = hexString.Substring(32 * i, sl);
+                    sl = hexString.Length - 8 * i;
+                    if(sl > 8) sl = 8;
+                    subHexString = hexString.Substring(8 * i, sl);
                 }
                 resArr[i+4] = subHexString;
 
