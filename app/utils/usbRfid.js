@@ -59,7 +59,7 @@ var edgeWritePmKey = edge.func(function () {/*
         public static extern int PMSifEncodeKcdLcl(byte ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
         string lic_code = "BBC7.6027.91B3.3824.8E5D";
-        string app_name = "Downer_Defence";
+        string app_name = "DESKTOP-MLMP91M";
 
         private string formatStr(string str, int num_blk)
         {            
@@ -96,7 +96,7 @@ var edgeWritePmKey = edge.func(function () {/*
             string[] eDate2 = eDate0[1].Split(':');
 
             string writteData = "*R" + rNum;
-            writteData += "*TStandard";
+            writteData += "*TSINGLE";
             writteData += "*F" + clsPdf.firstName;
             writteData += "*N" + clsPdf.lastName;
             writteData += "*UGUEST";
