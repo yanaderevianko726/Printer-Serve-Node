@@ -70,6 +70,37 @@ var edgeWritePmKey = edge.func(function () {/*
     using System.Threading;
     using System.Text.RegularExpressions;
 
+    public class ClsPdf
+    {
+        public string firstName = "";
+        public string lastName = "";
+        public string pmKey = "";
+        public string rank = "";
+        public string roomKey = "";
+        public string roomNum = "";
+        public string mobile = "";
+        public string lockerNumber = "";
+        public string bookType = "";
+        public string vehicle = "";
+        public string startedAt = "";
+        public string endAt = "";
+
+        public void initWithDynamic(dynamic input){
+            firstName = input.firstName;
+            lastName = input.lastName;
+            pmKey = input.pmKey;
+            rank = input.rank;
+            roomKey = input.roomKey;
+            roomNum = input.roomNum;
+            mobile = input.mobile;
+            lockerNumber = input.lockerNumber;
+            bookType = input.bookType;
+            vehicle = input.vehicle;
+            startedAt = input.startedAt;
+            endAt = input.endAt;
+        }
+    }
+
     public class Startup
     {
         [DllImport("function.dll")]
@@ -104,8 +135,27 @@ var edgeWritePmKey = edge.func(function () {/*
         }
 
         public async Task<object> Invoke(dynamic input)
-        {
-            string writteData = input.keyData;
+        {   
+            ClsPdf clsPdf = new ClsPdf();
+            clsPdf.initWithDynamic(input);
+
+            string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
+
+            string[] sDate0 = clsPdf.startedAt.Split(' ');
+            string[] sDate1 = sDate0[0].Split('-');
+            string[] sDate2 = sDate0[1].Split(':');
+
+            string[] eDate0 = clsPdf.endAt.Split(' ');
+            string[] eDate1 = eDate0[0].Split('-');
+            string[] eDate2 = eDate0[1].Split(':');
+
+            string writteData = "*R" + rNum;
+            writteData += "*TStandard";
+            writteData += "*F" + clsPdf.firstName;
+            writteData += "*N" + clsPdf.lastName;
+            writteData += "*UGuest";
+            writteData += "*D" + sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
+            writteData += "*O" + eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
 
             // int Res = PMSifRegister(lic_code, app_name);
             // PMSifEncodeKcdLcl(Cmd, writteData, false, txtSysID.Text, txtSysFName.Text, txtSysLName.Text);
@@ -161,6 +211,46 @@ var edgeWritePmKey = edge.func(function () {/*
     }
 */});
 
+var decodeKeyData = edge.func(function () {/*
+    using System.Threading.Tasks;
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Drawing;
+    using System.Linq;
+    using System.Text;
+    using System.Runtime.InteropServices;
+    using System.IO.Ports;
+    using System.Reflection;
+    using System.Runtime.CompilerServices;
+    using System.Diagnostics;
+    using System.Threading;
+    using System.Text.RegularExpressions;
+
+    public class Startup
+    {
+        public static byte[] FromHex(string hex)
+        {
+            hex = hex.Replace("-", "");
+            byte[] raw = new byte[hex.Length / 2];
+            for (int i = 0; i < raw.Length; i++)
+            {
+                raw[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
+            }
+            return raw;
+        }
+
+        public async Task<object> Invoke(dynamic input)
+        {
+            string writteData = input.keyData;
+            byte[] data = FromHex(writteData);
+            string s = Encoding.Default.GetString(data);
+
+            return s;
+        }
+    }
+*/});
+
 // constructor
 const UsbRfid = function (obj) {
 
@@ -174,8 +264,16 @@ UsbRfid.readInfo = (reqBody, result) => {
     });
 };
 
-UsbRfid.writePmKey = (rfidKey, result) => { 
-    edgeWritePmKey(rfidKey, function (error, retVal) {
+UsbRfid.writePmKey = (pdfs, result) => { 
+    edgeWritePmKey(pdfs, function (error, retVal) {
+        if (error) throw error;
+        console.log(retVal);    
+        result(null, { retInt: retVal, ...pdfs });
+    });
+};
+
+UsbRfid.decodeKey = (rfidKey, result) => { 
+    decodeKeyData(rfidKey, function (error, retVal) {
         if (error) throw error;
         console.log(retVal);    
         result(null, { retInt: retVal, ...rfidKey });

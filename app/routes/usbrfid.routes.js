@@ -5,6 +5,7 @@ module.exports = app => {
   router.get("/", usbRfidController.initController);
   router.post("/readInfo", usbRfidController.readInfo);
   router.post("/writePmKey", usbRfidController.writeUserPmKey);
+  router.post("/decodeKey", usbRfidController.decodeKey);
 
   app.use('/api/usbRfid', router);
 };
