@@ -52,10 +52,10 @@ var edgeWritePmKey = edge.func(function () {/*
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
-        [DllImport("pmsif.dll")]
+        [DllImport("pmsif.dll", EntryPoint = "PMSifRegister", CharSet = CharSet.Ansi)]
         public static extern int PMSifRegister(string szLicense, string szAppl);
 
-        [DllImport("pmsif.dll")]
+        [DllImport("pmsif.dll", EntryPoint = "PMSifEncodeKcdLcl", CharSet = CharSet.Ansi)]
         public static extern int PMSifEncodeKcdLcl(byte ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
         string lic_code = "42577125-1379152419-1379283491";
@@ -103,8 +103,7 @@ var edgeWritePmKey = edge.func(function () {/*
             writteData += "*D" + sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
             writteData += "*O" + eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
 
-            int Res = 0;
-            Res = PMSifRegister(lic_code, app_name);
+            // int Res = PMSifRegister(lic_code, app_name);
             // PMSifEncodeKcdLcl(Cmd, writteData, false, txtSysID.Text, txtSysFName.Text, txtSysLName.Text);
 
             byte[] bytesWritten = Encoding.Default.GetBytes(writteData); 
