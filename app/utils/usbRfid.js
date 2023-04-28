@@ -153,7 +153,7 @@ var edgeWritePmKey = edge.func(function () {/*
             writteData += "*TStandard";
             writteData += "*F" + clsPdf.firstName;
             writteData += "*N" + clsPdf.lastName;
-            writteData += "*UGuest";
+            writteData += "*UGUEST";
             writteData += "*D" + sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
             writteData += "*O" + eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
 
