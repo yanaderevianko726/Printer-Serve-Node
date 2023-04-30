@@ -52,15 +52,6 @@ var edgeWritePmKey = edge.func(function () {/*
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
-        [DllImport("pmsif.dll", EntryPoint = "PMSifRegister", CharSet = CharSet.Ansi)]
-        public static extern int PMSifRegister(string szLicense, string szAppl);
-
-        [DllImport("pmsif.dll", EntryPoint = "PMSifEncodeKcdLcl", CharSet = CharSet.Ansi)]
-        public static extern int PMSifEncodeKcdLcl(byte ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
-
-        string lic_code = "42577125-1379152419-1379283491";
-        string app_name = "DESKTOP-MLMP91M";
-
         private string formatStr(string str, int num_blk)
         {            
             string tmp=Regex.Replace(str,"[^a-fA-F0-9]","");
@@ -96,26 +87,66 @@ var edgeWritePmKey = edge.func(function () {/*
             string[] eDate2 = eDate0[1].Split(':');
 
             string writteData = "*R" + rNum;
+            string asciiStr = "30 82 "; // *R
+            byte[] rBytes = Encoding.ASCII.GetBytes(rNum);
+            foreach (byte byt in rBytes)
+            {
+                asciiStr += byt.ToString("x") + " ";
+            }
+
             writteData += "*TSINGLE";
+            asciiStr += "30 84 "; // *T
+            byte[] tBytes = Encoding.ASCII.GetBytes("SINGLE");
+            foreach (byte byt in tBytes)
+            {
+                asciiStr += byt.ToString("x") + " ";
+            }
+
             writteData += "*F" + clsPdf.firstName;
+            asciiStr += "30 70 "; // *F
+            byte[] fBytes = Encoding.ASCII.GetBytes(clsPdf.firstName);
+            foreach (byte byt in fBytes)
+            {
+                asciiStr += byt.ToString("x") + " ";
+            }
+
             writteData += "*N" + clsPdf.lastName;
+            asciiStr += "30 78 "; // *N
+            byte[] lBytes = Encoding.ASCII.GetBytes(clsPdf.lastName);
+            foreach (byte byt in lBytes)
+            {
+                asciiStr += byt.ToString("x") + " ";
+            }
+
             writteData += "*UGUEST";
-            writteData += "*D" + sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
-            writteData += "*O" + eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
+            asciiStr += "30 85 "; // *U
+            byte[] uBytes = Encoding.ASCII.GetBytes("GUEST");
+            foreach (byte byt in uBytes)
+            {
+                asciiStr += byt.ToString("x") + " ";
+            }
 
-            // int Res = PMSifRegister(lic_code, app_name);
-            // PMSifEncodeKcdLcl(Cmd, writteData, false, txtSysID.Text, txtSysFName.Text, txtSysLName.Text);
+            string dDate = sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
+            writteData += "*D" + dDate;
+            asciiStr += "30 68 "; // *D
+            byte[] dBytes = Encoding.ASCII.GetBytes(dDate);
+            foreach (byte byt in dBytes)
+            {
+                asciiStr += byt.ToString("x") + " ";
+            }
 
-            byte[] bytesWritten = Encoding.Default.GetBytes(writteData); 
-            string hexString = BitConverter.ToString(bytesWritten);
-            hexString = hexString.Replace("-", "");
+            string oDate = eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
+            writteData += "*O" + oDate;
+            asciiStr += "30 79 "; // *O
+            byte[] oBytes = Encoding.ASCII.GetBytes(oDate);
+            foreach (byte byt in oBytes)
+            {
+                asciiStr += byt.ToString("x") + " ";
+            }
 
-            byte mode = 0x00;
-            byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
+            string hexString = formatStr(asciiStr, -1);
 
-            string[] blk_list = new string[12]{ "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15" };
             int blk_count = hexString.Length / 8;
-            
             if(hexString.Length % 8 > 0){
                 blk_count++;
             }
@@ -125,10 +156,14 @@ var edgeWritePmKey = edge.func(function () {/*
 
             string[] resArr = new string[blk_count+4];
             resArr[0] = writteData;
-            resArr[1] = hexString;
-            resArr[2] = hexString.Length.ToString();
-            resArr[3] = Res.ToString();
+            resArr[1] = asciiStr; 
+            resArr[2] = hexString;  
+            resArr[3] = hexString.Length.ToString();         
 
+            byte mode = 0x00;
+            byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
+            string[] blk_list = new string[12]{ "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15" };            
+            
             for (int i = 0; i < blk_count; i++) 
             {
                 byte blk_add = Convert.ToByte(blk_list[i], 16);
