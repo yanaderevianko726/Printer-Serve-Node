@@ -52,8 +52,11 @@ var edgeWritePmKey = edge.func(function () {/*
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
-        [DllImport("pmsif.dll")]
-        public static extern int PMSifRegister(string szLicense, string szAppl);
+        [DllImport("tcppmsif.dll")]
+        public static extern string PMSifReturnKcdLcl(byte ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+
+        [DllImport("tcppmsif.dll")]
+        public static extern string SPMSifEncodeKcdLclMsg(byte ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
         private string formatStr(string str, int num_blk)
         {            
@@ -78,8 +81,6 @@ var edgeWritePmKey = edge.func(function () {/*
         {   
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
-
-            int retR = PMSifRegister("Temp", "Temp App");
 
             string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
 
@@ -200,7 +201,7 @@ var edgeWritePmKey = edge.func(function () {/*
                 bufferStr = formatStr(subHexString, -1);
                 convertStr(buffer, bufferStr, sl / 2);
 
-                int nRet = UL_HLWrite(mode, blk_add, snr, buffer);
+                // int nRet = UL_HLWrite(mode, blk_add, snr, buffer);
             }
 
             return resArr;
