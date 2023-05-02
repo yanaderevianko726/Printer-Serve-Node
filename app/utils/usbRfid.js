@@ -180,7 +180,7 @@ var edgeWritePmKey = edge.func(function () {/*
             resArr[1] = hexString;  
             resArr[2] = hexString.Length.ToString();  
 
-            int retInt = PMSifRegister("", "");           
+            // int retInt = PMSifRegister("", "");           
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
