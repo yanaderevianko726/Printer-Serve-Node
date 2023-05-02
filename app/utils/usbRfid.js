@@ -174,21 +174,22 @@ var edgeWritePmKey = edge.func(function () {/*
             asciiStr += recordSp + ascCode.ToString("X") + nn.ToString("X"); // *J5
 
             string hexString = formatStr(asciiStr, -1);
-            int retInt = PMSifRegister("", "");
 
-            int blk_count = 12;
-
-            string[] resArr = new string[blk_count+3];
+            string[] resArr = new string[15];
             resArr[0] = writteData;
             resArr[1] = hexString;  
-            resArr[2] = hexString.Length.ToString();         
+            resArr[2] = hexString.Length.ToString();  
+
+            int retInt = PMSifRegister("", "");           
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
             string[] blk_list = new string[12]{ "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15" };            
             
             string keycardData = "FCFF0F000000FCFF0F000000FCFF0FF10000FCFF0F000000FCFF0F000000FCEF0F000000FCFF0F0000C0FFFFFF030016";
-            for (int i = 0; i < 12; i++) 
+            
+            int blk_count = 12;
+            for (int i = 0; i < blk_count; i++) 
             {
                 byte blk_add = Convert.ToByte(blk_list[i], 16);
 
