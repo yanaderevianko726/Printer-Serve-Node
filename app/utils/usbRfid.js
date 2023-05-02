@@ -52,11 +52,14 @@ var edgeWritePmKey = edge.func(function () {/*
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
-        [DllImport("tcppmsif.dll")]
+        [DllImport("tcppmsif.dll", EntryPoint = "PMSifRegister", CharSet = CharSet.Ansi)]
+        public static extern int PMSifRegister(string szLicense, string szAppl);
+
+        [DllImport("tcppmsif.dll", EntryPoint = "PMSifReturnKcdLcl", CharSet = CharSet.Ansi)]
         public static extern string PMSifReturnKcdLcl(byte ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
-        [DllImport("tcppmsif.dll")]
-        public static extern string SPMSifEncodeKcdLclMsg(byte ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+        [DllImport("tcppmsif.dll", EntryPoint = "PMSifEncodeKcdLcl", CharSet = CharSet.Ansi)]
+        public static extern void PMSifEncodeKcdLcl(byte ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
         private string formatStr(string str, int num_blk)
         {            
@@ -82,7 +85,60 @@ var edgeWritePmKey = edge.func(function () {/*
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
 
-            string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
+            string writteData = "G";    
+            int ascCode = 71;  // G
+            string asciiStr = ascCode.ToString("X"); 
+
+            ascCode = 30; // Record Separator
+            string recordSp = ascCode.ToString("X");
+
+            // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
+            string rNum = clsPdf.roomNum;
+
+            writteData += "*R" + rNum;
+            ascCode = 82;
+            asciiStr += recordSp + ascCode.ToString("X"); // *R
+            byte[] rBytes = Encoding.ASCII.GetBytes(rNum);
+            foreach (byte byt in rBytes)
+            {
+                asciiStr += byt.ToString("X");
+            }
+
+            writteData += "*TSINGLE";
+            ascCode = 84;
+            asciiStr += recordSp + ascCode.ToString("X"); // *T
+            byte[] tBytes = Encoding.ASCII.GetBytes("SINGLE");
+            foreach (byte byt in tBytes)
+            {
+                asciiStr += byt.ToString("X");
+            }
+
+            writteData += "*F" + clsPdf.firstName;
+            ascCode = 70;
+            asciiStr += recordSp + ascCode.ToString("X"); // *F
+            byte[] fBytes = Encoding.ASCII.GetBytes(clsPdf.firstName);
+            foreach (byte byt in fBytes)
+            {
+                asciiStr += byt.ToString("X");
+            }
+
+            writteData += "*N" + clsPdf.lastName;
+            ascCode = 78;
+            asciiStr += recordSp + ascCode.ToString("X"); // *N
+            byte[] lBytes = Encoding.ASCII.GetBytes(clsPdf.lastName);
+            foreach (byte byt in lBytes)
+            {
+                asciiStr += byt.ToString("X");
+            }
+
+            writteData += "*UGUEST";
+            ascCode = 85;
+            asciiStr += recordSp + ascCode.ToString("X"); // *U
+            byte[] uBytes = Encoding.ASCII.GetBytes("GUEST");
+            foreach (byte byt in uBytes)
+            {
+                asciiStr += byt.ToString("X");
+            }
 
             string[] sDate0 = clsPdf.startedAt.Split(' ');
             string[] sDate1 = sDate0[0].Split('-');
@@ -92,114 +148,58 @@ var edgeWritePmKey = edge.func(function () {/*
             string[] eDate1 = eDate0[0].Split('-');
             string[] eDate2 = eDate0[1].Split(':');
 
-            int ascCode = 30;
-            string recordSp = ascCode.ToString("X") + " ";
-
-            string writteData = "*R" + rNum;
-            ascCode = 82;
-            string asciiStr = recordSp + ascCode.ToString("X") + " "; // *R
-            byte[] rBytes = Encoding.ASCII.GetBytes(rNum);
-            foreach (byte byt in rBytes)
-            {
-                asciiStr += byt.ToString("X") + " ";
-            }
-
-            writteData += "*TSINGLE";
-            ascCode = 84;
-            asciiStr += recordSp + ascCode.ToString("X") + " "; // *T
-            byte[] tBytes = Encoding.ASCII.GetBytes("SINGLE");
-            foreach (byte byt in tBytes)
-            {
-                asciiStr += byt.ToString("X") + " ";
-            }
-
-            writteData += "*F" + clsPdf.firstName;
-            ascCode = 70;
-            asciiStr += recordSp + ascCode.ToString("X") + " "; // *F
-            byte[] fBytes = Encoding.ASCII.GetBytes(clsPdf.firstName);
-            foreach (byte byt in fBytes)
-            {
-                asciiStr += byt.ToString("X") + " ";
-            }
-
-            writteData += "*N" + clsPdf.lastName;
-            ascCode = 78;
-            asciiStr += recordSp + ascCode.ToString("X") + " "; // *N
-            byte[] lBytes = Encoding.ASCII.GetBytes(clsPdf.lastName);
-            foreach (byte byt in lBytes)
-            {
-                asciiStr += byt.ToString("X") + " ";
-            }
-
-            writteData += "*UGUEST";
-            ascCode = 85;
-            asciiStr += recordSp + ascCode.ToString("X") + " "; // *U
-            byte[] uBytes = Encoding.ASCII.GetBytes("GUEST");
-            foreach (byte byt in uBytes)
-            {
-                asciiStr += byt.ToString("X") + " ";
-            }
-
             string dDate = sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
             writteData += "*D" + dDate;
             ascCode = 68;
-            asciiStr += recordSp + ascCode.ToString("X") + " "; // *D
+            asciiStr += recordSp + ascCode.ToString("X"); // *D
             byte[] dBytes = Encoding.ASCII.GetBytes(dDate);
             foreach (byte byt in dBytes)
             {
-                asciiStr += byt.ToString("X") + " ";
+                asciiStr += byt.ToString("X");
             }
 
             string oDate = eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
             writteData += "*O" + oDate;
             ascCode = 79;
-            asciiStr += recordSp + ascCode.ToString("X") + " "; // *O
+            asciiStr += recordSp + ascCode.ToString("X"); // *O
             byte[] oBytes = Encoding.ASCII.GetBytes(oDate);
             foreach (byte byt in oBytes)
             {
-                asciiStr += byt.ToString("X") + " ";
+                asciiStr += byt.ToString("X");
             }
+
+            writteData += "*J5";
+            ascCode = 74;
+            int nn = 5;
+            asciiStr += recordSp + ascCode.ToString("X") + nn.ToString("X"); // *J5
 
             string hexString = formatStr(asciiStr, -1);
+            int retInt = PMSifRegister("", "");
 
-            int blk_count = hexString.Length / 8;
-            if(hexString.Length % 8 > 0){
-                blk_count++;
-            }
-            if(blk_count > 12){
-                blk_count = 12;
-            }
+            int blk_count = 12;
 
-            string[] resArr = new string[blk_count+4];
+            string[] resArr = new string[blk_count+3];
             resArr[0] = writteData;
-            resArr[1] = asciiStr; 
-            resArr[2] = hexString;  
-            resArr[3] = hexString.Length.ToString();         
+            resArr[1] = hexString;  
+            resArr[2] = hexString.Length.ToString();         
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
             string[] blk_list = new string[12]{ "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15" };            
             
-            for (int i = 0; i < blk_count; i++) 
+            string keycardData = "FCFF0F000000FCFF0F000000FCFF0FF10000FCFF0F000000FCFF0F000000FCEF0F000000FCFF0F0000C0FFFFFF030016";
+            for (int i = 0; i < 12; i++) 
             {
                 byte blk_add = Convert.ToByte(blk_list[i], 16);
 
-                string subHexString = "";
+                string subHexString = keycardData.Substring(8 * i, 8);
+                resArr[i+3] = subHexString;
+
                 string bufferStr = "";
-                int sl = 8;
-
-                if(i < blk_count - 1){
-                    subHexString = hexString.Substring(8 * i, 8);
-                }else{
-                    sl = hexString.Length - 8 * i;
-                    if(sl > 8) sl = 8;
-                    subHexString = hexString.Substring(8 * i, sl);
-                }
-                resArr[i+4] = subHexString;
-
-                byte[] buffer = new byte[sl];
                 bufferStr = formatStr(subHexString, -1);
-                convertStr(buffer, bufferStr, sl / 2);
+
+                byte[] buffer = new byte[4];
+                convertStr(buffer, bufferStr, 4);
 
                 // int nRet = UL_HLWrite(mode, blk_add, snr, buffer);
             }
