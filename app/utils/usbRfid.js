@@ -15,6 +15,7 @@ var edgeWritePmKey = edge.func(function () {/*
     using System.Diagnostics;
     using System.Threading;
     using System.Text.RegularExpressions;
+    using System.Net.Sockets;
 
     struct SPMSifHdr
     {
@@ -115,7 +116,9 @@ var edgeWritePmKey = edge.func(function () {/*
         const int CMD_ENCODEKCDLCL = 3;
         const int CMD_RETURNKCDLCL = 5;
         const int CMD_VERIFYKCDLCL = 12;
-        const int TCP_PORT = 12;
+        const int TCP_PORT = 3015;
+
+        System.Net.Sockets.TcpClient clientSocket = new System.Net.Sockets.TcpClient();
 
         private void SetHeader(int TCmd, SPMSifHdr hdr){
             hdr.ui32Synch1 = Convert.ToUInt32("55555555", 16);
@@ -145,6 +148,10 @@ var edgeWritePmKey = edge.func(function () {/*
                     break;
             }
             return res;
+        }
+
+        private void connectServer() {
+            clientSocket.Connect("127.0.0.1", TCP_PORT);
         }
 
         private string formatStr(string str, int num_blk)
