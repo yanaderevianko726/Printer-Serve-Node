@@ -178,14 +178,15 @@ var edgeWritePmKey = edge.func(function () {/*
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
 
+            connectServer();
+
             string dtaStr = "";
 
             int unicode = 30;  // Record Separator
             char character = (char) unicode;
             string recordSp = character.ToString();
 
-            // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
-            string rNum = clsPdf.roomNum;
+            string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
             dtaStr += recordSp + "R" + rNum;
 
             dtaStr += recordSp + "TSINGLE";
