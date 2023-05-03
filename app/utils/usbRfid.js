@@ -173,6 +173,24 @@ var edgeWritePmKey = edge.func(function () {/*
             }
         }
 
+        private byte[] getRetMsgBytes(SPMSifReturnKcdLclMsg retMsg) {
+            int size = Marshal.SizeOf(retMsg);
+            byte[] arr = new byte[size];
+
+            IntPtr ptr = IntPtr.Zero;
+            try
+            {
+                ptr = Marshal.AllocHGlobal(size);
+                Marshal.StructureToPtr(retMsg, ptr, true);
+                Marshal.Copy(ptr, arr, 0, size);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(ptr);
+            }
+            return arr;
+        }
+
         public async Task<object> Invoke(dynamic input)
         {   
             ClsPdf clsPdf = new ClsPdf();
@@ -228,13 +246,15 @@ var edgeWritePmKey = edge.func(function () {/*
             }
 
             SetHeader(CMD_RETURNKCDLCL, RetMsg.hdr1);
-            
+
             RetMsg.ff = Cmd;
             RetMsg.Dta = TmpDta;
             RetMsg.Debug = false;
             RetMsg.szOpID = "";
             RetMsg.szOpFirst = "";
-            RetMsg.szOpLast = "";           
+            RetMsg.szOpLast = "";
+
+            byteMsg = getRetMsgBytes(RetMsg);           
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
