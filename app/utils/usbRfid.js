@@ -28,8 +28,8 @@ var edgeWritePmKey = edge.func(function () {/*
     struct SPMSifRegisterMsg
     {
         public SPMSifHdr hdr1; 
-        public char[] szLicense; 
-        public char[] szApplName; 
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)] public char[] szLicense; 
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)] public char[] szApplName; 
         public int nRet;  
     }
 
@@ -43,11 +43,11 @@ var edgeWritePmKey = edge.func(function () {/*
     {
         public SPMSifHdr hdr1; 
         public char ff; 
-        public char[] Dta; 
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)] public char[] Dta; 
         public bool Debug;  
-        public char[] szOpID; 
-        public char[] szOpFirst; 
-        public char[] szOpLast; 
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)] public char[] szOpID; 
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] public char[] szOpFirst; 
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] public char[] szOpLast; 
     }
 
     struct SPMSifVerifyKcdLclMsg
@@ -55,12 +55,12 @@ var edgeWritePmKey = edge.func(function () {/*
         public SPMSifHdr hdr1; 
         public char ff; 
         public char gg; 
-        public char[] Kcd; 
-        public char[] Dta; 
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 266)] public char[] Kcd; 
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)] public char[] Dta; 
         public bool Debug;  
-        public char[] szOpID; 
-        public char[] szOpFirst; 
-        public char[] szOpLast; 
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)] public char[] szOpID; 
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] public char[] szOpFirst; 
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] public char[] szOpLast; 
     }
 
     struct SPMSifEncodeKcdLclMsg
