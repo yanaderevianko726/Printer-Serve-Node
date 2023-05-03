@@ -33,6 +33,12 @@ var edgeWritePmKey = edge.func(function () {/*
         public int nRet;  
     }
 
+    struct SPMSifUnregisterMsg
+    {
+        public SPMSifHdr hdr1; 
+        public int nRet;  
+    }
+
     struct SPMSifReturnKcdLclMsg
     {
         public SPMSifHdr hdr1; 
@@ -50,6 +56,17 @@ var edgeWritePmKey = edge.func(function () {/*
         public char ff; 
         public char gg; 
         public char[] Kcd; 
+        public char[] Dta; 
+        public bool Debug;  
+        public char[] szOpID; 
+        public char[] szOpFirst; 
+        public char[] szOpLast; 
+    }
+
+    struct SPMSifEncodeKcdLclMsg
+    {
+        public SPMSifHdr hdr1; 
+        public char ff; 
         public char[] Dta; 
         public bool Debug;  
         public char[] szOpID; 
@@ -105,29 +122,26 @@ var edgeWritePmKey = edge.func(function () {/*
             hdr.ui32Synch2 = Convert.ToUInt32("AAAAAAAA", 16);
             hdr.ui16Version = 1;
             hdr.ui32Cmd = TCmd;
-            hdr.ui32BodySize = GetSize(TCmd) - sizeof(SPMSifHdr);
+            hdr.ui32BodySize = GetSize(TCmd) - Marshal.SizeOf(typeof(SPMSifHdr));
         }
 
         private int GetSize(int TCmd) {
-            int res = sizeof(SPMSifHdr);
+            int res = Marshal.SizeOf(typeof(SPMSifHdr));
             switch(TCmd){
                 case CMD_REGISTER:
-                    res = sizeof(SPMSifRegisterMsg);
+                    res = Marshal.SizeOf(typeof(SPMSifRegisterMsg));
                     break;
-                case CMD_REGISTER:
-                    res = sizeof(SPMSifUnregisterMsg);
+                case CMD_UNREGISTER:
+                    res = Marshal.SizeOf(typeof(SPMSifUnregisterMsg));
                     break;
-                case CMD_REGISTER:
-                    res = sizeof(SPMSifEncodeKcdLclMsg);
+                case CMD_ENCODEKCDLCL:
+                    res = Marshal.SizeOf(typeof(SPMSifEncodeKcdLclMsg));
                     break;
-                case CMD_REGISTER:
-                    res = sizeof(SPMSifReturnKcdLclMsg);
+                case CMD_RETURNKCDLCL:
+                    res = Marshal.SizeOf(typeof(SPMSifReturnKcdLclMsg));
                     break;
-                case CMD_REGISTER:
-                    res = sizeof(SPMSifVerifyKcdLclMsg);
-                    break;
-                default:
-                    res = sizeof(SPMSifHdr);
+                case CMD_VERIFYKCDLCL:
+                    res = Marshal.SizeOf(typeof(SPMSifVerifyKcdLclMsg));
                     break;
             }
             return res;
