@@ -20,6 +20,7 @@ var edgeWritePmKey = edge.func(function () {/*
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Runtime.Serialization;
 
+    [Serializable]
     struct SPMSifHdr
     {
         public uint ui32Synch1;  
@@ -43,6 +44,7 @@ var edgeWritePmKey = edge.func(function () {/*
         public int nRet;  
     }
 
+    [Serializable]
     struct SPMSifReturnKcdLclMsg
     {
         public SPMSifHdr hdr1; 
@@ -176,22 +178,19 @@ var edgeWritePmKey = edge.func(function () {/*
             }
         }
 
-        private byte[] getRetBytes(SPMSifReturnKcdLclMsg str) {
-            int size = Marshal.SizeOf(str);
-            byte[] arr = new byte[size];
+        public static byte[] Serialize<T>(T data) where T : struct
+        {
+            var formatter = new BinaryFormatter();
+            var stream = new MemoryStream();
+            formatter.Serialize(stream, data);
+            return stream.ToArray();
+        }
 
-            IntPtr ptr = IntPtr.Zero;
-            try
-            {
-                ptr = Marshal.AllocHGlobal(size);
-                Marshal.StructureToPtr(str, ptr, true);
-                Marshal.Copy(ptr, arr, 0, size);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(ptr);
-            }
-            return arr;
+        public static T Deserialize<T>(byte[] array) where T : struct
+        {
+            var stream = new MemoryStream(array);
+            var formatter = new BinaryFormatter();
+            return (T)formatter.Deserialize(stream);
         }
 
         public async Task<object> Invoke(dynamic input)
@@ -239,12 +238,12 @@ var edgeWritePmKey = edge.func(function () {/*
 
             SPMSifReturnKcdLclMsg RetMsg = new SPMSifReturnKcdLclMsg();
             int sz = Marshal.SizeOf(typeof(SPMSifReturnKcdLclMsg));
-            byte[] byteMsg = new byte[sz];
+            byte[] outStream = new byte[sz];
 
             int indexMsg = 0;
-            foreach (var element in byteMsg)
+            foreach (var element in outStream)
             {
-                byteMsg[indexMsg] = 0;
+                outStream[indexMsg] = 0;
                 indexMsg++;
             }
 
@@ -261,12 +260,12 @@ var edgeWritePmKey = edge.func(function () {/*
 
             NetworkStream serverStream = clientSocket.GetStream();   
 
-            byte[] outStream = getRetBytes(RetMsg);
+            outStream = Serialize(RetMsg);
             serverStream.Write(outStream, 0, outStream.Length);
-            serverStream.Flush();    
 
-            byte[] inStream = new byte[10025];
-            serverStream.Read(inStream, 0, (int)clientSocket.ReceiveBufferSize);
+            int readSz = (int) clientSocket.ReceiveBufferSize;
+            byte[] inStream = new byte[readSz];
+            serverStream.Read(inStream, 0, readSz);
             string returndata = System.Text.Encoding.ASCII.GetString(inStream); 
             resArr[1] = returndata;  
 
