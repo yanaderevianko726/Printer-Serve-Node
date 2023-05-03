@@ -40,6 +40,7 @@ var edgeWritePmKey = edge.func(function () {/*
         public int nRet;  
     }
 
+    [Serializable]
     struct SPMSifReturnKcdLclMsg
     {
         public SPMSifHdr hdr1; 
@@ -173,22 +174,12 @@ var edgeWritePmKey = edge.func(function () {/*
             }
         }
 
-        private byte[] getRetMsgBytes(SPMSifReturnKcdLclMsg retMsg) {
-            int size = Marshal.SizeOf(retMsg);
-            byte[] arr = new byte[size];
-
-            IntPtr ptr = IntPtr.Zero;
-            try
-            {
-                ptr = Marshal.AllocHGlobal(size);
-                Marshal.StructureToPtr(retMsg, ptr, true);
-                Marshal.Copy(ptr, arr, 0, size);
-            }
-            finally
-            {
-                Marshal.FreeHGlobal(ptr);
-            }
-            return arr;
+        public static byte[] Serialize<T>(T data) where T : struct
+        {
+            var formatter = new BinaryFormatter();
+            var stream = new MemoryStream();
+            formatter.Serialize(stream, data);
+            return stream.ToArray();
         }
 
         public async Task<object> Invoke(dynamic input)
@@ -254,7 +245,7 @@ var edgeWritePmKey = edge.func(function () {/*
             RetMsg.szOpFirst = "";
             RetMsg.szOpLast = "";
 
-            byteMsg = getRetMsgBytes(RetMsg);           
+            byteMsg = Serialize(RetMsg);           
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
