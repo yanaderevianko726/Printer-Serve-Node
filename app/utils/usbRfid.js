@@ -16,6 +16,47 @@ var edgeWritePmKey = edge.func(function () {/*
     using System.Threading;
     using System.Text.RegularExpressions;
 
+    struct SPMSifHdr
+    {
+        public uint ui32Synch1;  
+        public uint ui32Synch2;  
+        public ushort ui16Version;  
+        public int ui32Cmd;  
+        public int ui32BodySize;  
+    }
+
+    struct SPMSifRegisterMsg
+    {
+        public SPMSifHdr hdr1; 
+        public char[] szLicense; 
+        public char[] szApplName; 
+        public int nRet;  
+    }
+
+    struct SPMSifReturnKcdLclMsg
+    {
+        public SPMSifHdr hdr1; 
+        public char ff; 
+        public char[] Dta; 
+        public bool Debug;  
+        public char[] szOpID; 
+        public char[] szOpFirst; 
+        public char[] szOpLast; 
+    }
+
+    struct SPMSifVerifyKcdLclMsg
+    {
+        public SPMSifHdr hdr1; 
+        public char ff; 
+        public char gg; 
+        public char[] Kcd; 
+        public char[] Dta; 
+        public bool Debug;  
+        public char[] szOpID; 
+        public char[] szOpFirst; 
+        public char[] szOpLast; 
+    }
+
     public class ClsPdf
     {
         public string firstName = "";
@@ -52,14 +93,45 @@ var edgeWritePmKey = edge.func(function () {/*
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
-        [DllImport("tcppmsif.dll", EntryPoint = "PMSifRegister", CharSet = CharSet.Ansi)]
-        public static extern int PMSifRegister(string szLicense, string szAppl);
+        const int CMD_REGISTER = 1;
+        const int CMD_UNREGISTER = 2;
+        const int CMD_ENCODEKCDLCL = 3;
+        const int CMD_RETURNKCDLCL = 5;
+        const int CMD_VERIFYKCDLCL = 12;
+        const int TCP_PORT = 12;
 
-        [DllImport("tcppmsif.dll", EntryPoint = "PMSifReturnKcdLcl", CharSet = CharSet.Ansi)]
-        public static extern string PMSifReturnKcdLcl(byte ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+        private void SetHeader(int TCmd, SPMSifHdr hdr){
+            hdr.ui32Synch1 = Convert.ToUInt32("55555555", 16);
+            hdr.ui32Synch2 = Convert.ToUInt32("AAAAAAAA", 16);
+            hdr.ui16Version = 1;
+            hdr.ui32Cmd = TCmd;
+            hdr.ui32BodySize = GetSize(TCmd) - sizeof(SPMSifHdr);
+        }
 
-        [DllImport("tcppmsif.dll", EntryPoint = "PMSifEncodeKcdLcl", CharSet = CharSet.Ansi)]
-        public static extern void PMSifEncodeKcdLcl(byte ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+        private int GetSize(int TCmd) {
+            int res = sizeof(SPMSifHdr);
+            switch(TCmd){
+                case CMD_REGISTER:
+                    res = sizeof(SPMSifRegisterMsg);
+                    break;
+                case CMD_REGISTER:
+                    res = sizeof(SPMSifUnregisterMsg);
+                    break;
+                case CMD_REGISTER:
+                    res = sizeof(SPMSifEncodeKcdLclMsg);
+                    break;
+                case CMD_REGISTER:
+                    res = sizeof(SPMSifReturnKcdLclMsg);
+                    break;
+                case CMD_REGISTER:
+                    res = sizeof(SPMSifVerifyKcdLclMsg);
+                    break;
+                default:
+                    res = sizeof(SPMSifHdr);
+                    break;
+            }
+            return res;
+        }
 
         private string formatStr(string str, int num_blk)
         {            
@@ -85,60 +157,20 @@ var edgeWritePmKey = edge.func(function () {/*
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
 
-            string writteData = "G";    
-            int ascCode = 71;  // G
-            string asciiStr = ascCode.ToString("X"); 
+            string dtaStr = "";
 
-            ascCode = 30; // Record Separator
-            string recordSp = ascCode.ToString("X");
+            int unicode = 30;  // Record Separator
+            char character = (char) unicode;
+            string recordSp = character.ToString();
 
             // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
             string rNum = clsPdf.roomNum;
+            dtaStr += recordSp + "R" + rNum;
 
-            writteData += "*R" + rNum;
-            ascCode = 82;
-            asciiStr += recordSp + ascCode.ToString("X"); // *R
-            byte[] rBytes = Encoding.ASCII.GetBytes(rNum);
-            foreach (byte byt in rBytes)
-            {
-                asciiStr += byt.ToString("X");
-            }
-
-            writteData += "*TSINGLE";
-            ascCode = 84;
-            asciiStr += recordSp + ascCode.ToString("X"); // *T
-            byte[] tBytes = Encoding.ASCII.GetBytes("SINGLE");
-            foreach (byte byt in tBytes)
-            {
-                asciiStr += byt.ToString("X");
-            }
-
-            writteData += "*F" + clsPdf.firstName;
-            ascCode = 70;
-            asciiStr += recordSp + ascCode.ToString("X"); // *F
-            byte[] fBytes = Encoding.ASCII.GetBytes(clsPdf.firstName);
-            foreach (byte byt in fBytes)
-            {
-                asciiStr += byt.ToString("X");
-            }
-
-            writteData += "*N" + clsPdf.lastName;
-            ascCode = 78;
-            asciiStr += recordSp + ascCode.ToString("X"); // *N
-            byte[] lBytes = Encoding.ASCII.GetBytes(clsPdf.lastName);
-            foreach (byte byt in lBytes)
-            {
-                asciiStr += byt.ToString("X");
-            }
-
-            writteData += "*UGUEST";
-            ascCode = 85;
-            asciiStr += recordSp + ascCode.ToString("X"); // *U
-            byte[] uBytes = Encoding.ASCII.GetBytes("GUEST");
-            foreach (byte byt in uBytes)
-            {
-                asciiStr += byt.ToString("X");
-            }
+            dtaStr += recordSp + "TSINGLE";
+            dtaStr += recordSp + "F" + clsPdf.firstName;
+            dtaStr += recordSp + "N" + clsPdf.lastName;
+            dtaStr += recordSp + "UGUEST";
 
             string[] sDate0 = clsPdf.startedAt.Split(' ');
             string[] sDate1 = sDate0[0].Split('-');
@@ -149,38 +181,15 @@ var edgeWritePmKey = edge.func(function () {/*
             string[] eDate2 = eDate0[1].Split(':');
 
             string dDate = sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
-            writteData += "*D" + dDate;
-            ascCode = 68;
-            asciiStr += recordSp + ascCode.ToString("X"); // *D
-            byte[] dBytes = Encoding.ASCII.GetBytes(dDate);
-            foreach (byte byt in dBytes)
-            {
-                asciiStr += byt.ToString("X");
-            }
+            dtaStr += recordSp + "D" + dDate;
 
             string oDate = eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
-            writteData += "*O" + oDate;
-            ascCode = 79;
-            asciiStr += recordSp + ascCode.ToString("X"); // *O
-            byte[] oBytes = Encoding.ASCII.GetBytes(oDate);
-            foreach (byte byt in oBytes)
-            {
-                asciiStr += byt.ToString("X");
-            }
+            dtaStr += recordSp + "D" + oDate;
 
-            writteData += "*J5";
-            ascCode = 74;
-            int nn = 5;
-            asciiStr += recordSp + ascCode.ToString("X") + nn.ToString("X"); // *J5
+            dtaStr += recordSp + "J5";
 
-            string hexString = formatStr(asciiStr, -1);
-
-            string[] resArr = new string[15];
-            resArr[0] = writteData;
-            resArr[1] = hexString;  
-            resArr[2] = hexString.Length.ToString();  
-
-            // int retInt = PMSifRegister("", "");           
+            string[] resArr = new string[13];
+            resArr[0] = dtaStr;           
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
@@ -194,7 +203,7 @@ var edgeWritePmKey = edge.func(function () {/*
                 byte blk_add = Convert.ToByte(blk_list[i], 16);
 
                 string subHexString = keycardData.Substring(8 * i, 8);
-                resArr[i+3] = subHexString;
+                resArr[i+1] = subHexString;
 
                 string bufferStr = "";
                 bufferStr = formatStr(subHexString, -1);
