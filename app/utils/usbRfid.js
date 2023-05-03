@@ -9,6 +9,7 @@ var edgeWritePmKey = edge.func(function () {/*
     using System.Linq;
     using System.Text;
     using System.Runtime.InteropServices;
+    using System.IO;
     using System.IO.Ports;
     using System.Reflection;
     using System.Runtime.CompilerServices;
@@ -16,6 +17,8 @@ var edgeWritePmKey = edge.func(function () {/*
     using System.Threading;
     using System.Text.RegularExpressions;
     using System.Net.Sockets;
+    using System.Runtime.Serialization.Formatters.Binary;
+    using System.Runtime.Serialization;
 
     struct SPMSifHdr
     {
@@ -40,7 +43,6 @@ var edgeWritePmKey = edge.func(function () {/*
         public int nRet;  
     }
 
-    [Serializable]
     struct SPMSifReturnKcdLclMsg
     {
         public SPMSifHdr hdr1; 
@@ -174,12 +176,14 @@ var edgeWritePmKey = edge.func(function () {/*
             }
         }
 
-        public static byte[] Serialize<T>(T data) where T : struct
+        private byte[] ObjectToByteArray(Object obj)
         {
-            var formatter = new BinaryFormatter();
-            var stream = new MemoryStream();
-            formatter.Serialize(stream, data);
-            return stream.ToArray();
+            if (obj == null) return null;
+
+            BinaryFormatter bf = new BinaryFormatter();
+            MemoryStream ms = new MemoryStream();
+            bf.Serialize(ms, obj);
+            return ms.ToArray();
         }
 
         public async Task<object> Invoke(dynamic input)
@@ -223,7 +227,7 @@ var edgeWritePmKey = edge.func(function () {/*
             string[] resArr = new string[13];
             resArr[0] = TmpDta;
 
-            char Cmd = "G";
+            char Cmd = 'G';
 
             SPMSifReturnKcdLclMsg RetMsg = new SPMSifReturnKcdLclMsg();
             int sz = Marshal.SizeOf(typeof(SPMSifReturnKcdLclMsg));
@@ -245,7 +249,15 @@ var edgeWritePmKey = edge.func(function () {/*
             RetMsg.szOpFirst = "";
             RetMsg.szOpLast = "";
 
-            byteMsg = Serialize(RetMsg);           
+            NetworkStream serverStream = clientSocket.GetStream();   
+
+            byte[] outStream = ObjectToByteArray(RetMsg);
+            serverStream.Write(outStream, 0, outStream.Length);
+            serverStream.Flush();    
+
+            byte[] inStream = new byte[10025];
+            serverStream.Read(inStream, 0, (int)clientSocket.ReceiveBufferSize);
+            string returndata = System.Text.Encoding.ASCII.GetString(inStream);   
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
