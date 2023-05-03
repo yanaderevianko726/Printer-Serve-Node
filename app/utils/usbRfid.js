@@ -186,7 +186,8 @@ var edgeWritePmKey = edge.func(function () {/*
             char character = (char) unicode;
             string recordSp = character.ToString();
 
-            string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
+            // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
+            string rNum = "101";
             dtaStr += recordSp + "R" + rNum;
 
             dtaStr += recordSp + "TSINGLE";
