@@ -180,7 +180,7 @@ var edgeWritePmKey = edge.func(function () {/*
 
             connectServer();
 
-            string dtaStr = "";
+            string TmpDta = "";
 
             int unicode = 30;  // Record Separator
             char character = (char) unicode;
@@ -188,12 +188,12 @@ var edgeWritePmKey = edge.func(function () {/*
 
             // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
             string rNum = "101";
-            dtaStr += recordSp + "R" + rNum;
+            TmpDta += recordSp + "R" + rNum;
 
-            dtaStr += recordSp + "TSINGLE";
-            dtaStr += recordSp + "F" + clsPdf.firstName;
-            dtaStr += recordSp + "N" + clsPdf.lastName;
-            dtaStr += recordSp + "UGUEST";
+            TmpDta += recordSp + "TSINGLE";
+            TmpDta += recordSp + "F" + clsPdf.firstName;
+            TmpDta += recordSp + "N" + clsPdf.lastName;
+            TmpDta += recordSp + "UGUEST";
 
             string[] sDate0 = clsPdf.startedAt.Split(' ');
             string[] sDate1 = sDate0[0].Split('-');
@@ -204,15 +204,37 @@ var edgeWritePmKey = edge.func(function () {/*
             string[] eDate2 = eDate0[1].Split(':');
 
             string dDate = sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
-            dtaStr += recordSp + "D" + dDate;
+            TmpDta += recordSp + "D" + dDate;
 
             string oDate = eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
-            dtaStr += recordSp + "D" + oDate;
+            TmpDta += recordSp + "D" + oDate;
 
-            dtaStr += recordSp + "J5";
+            TmpDta += recordSp + "J5";
 
             string[] resArr = new string[13];
-            resArr[0] = dtaStr;           
+            resArr[0] = TmpDta;
+
+            char Cmd = "G";
+
+            SPMSifReturnKcdLclMsg RetMsg = new SPMSifReturnKcdLclMsg();
+            int sz = Marshal.SizeOf(typeof(SPMSifReturnKcdLclMsg));
+            byte[] byteMsg = new byte[sz];
+
+            int indexMsg = 0;
+            foreach (var element in byteMsg)
+            {
+                byteMsg[indexMsg] = 0;
+                indexMsg++;
+            }
+
+            SetHeader(CMD_RETURNKCDLCL, RetMsg.hdr1);
+            
+            RetMsg.ff = Cmd;
+            RetMsg.Dta = TmpDta;
+            RetMsg.Debug = false;
+            RetMsg.szOpID = "";
+            RetMsg.szOpFirst = "";
+            RetMsg.szOpLast = "";           
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
