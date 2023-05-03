@@ -176,14 +176,22 @@ var edgeWritePmKey = edge.func(function () {/*
             }
         }
 
-        private byte[] ObjectToByteArray(Object obj)
-        {
-            if (obj == null) return null;
+        private byte[] getRetBytes(SPMSifReturnKcdLclMsg str) {
+            int size = Marshal.SizeOf(str);
+            byte[] arr = new byte[size];
 
-            BinaryFormatter bf = new BinaryFormatter();
-            MemoryStream ms = new MemoryStream();
-            bf.Serialize(ms, obj);
-            return ms.ToArray();
+            IntPtr ptr = IntPtr.Zero;
+            try
+            {
+                ptr = Marshal.AllocHGlobal(size);
+                Marshal.StructureToPtr(str, ptr, true);
+                Marshal.Copy(ptr, arr, 0, size);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(ptr);
+            }
+            return arr;
         }
 
         public async Task<object> Invoke(dynamic input)
@@ -224,7 +232,7 @@ var edgeWritePmKey = edge.func(function () {/*
 
             TmpDta += recordSp + "J5";
 
-            string[] resArr = new string[13];
+            string[] resArr = new string[14];
             resArr[0] = TmpDta;
 
             char Cmd = 'G';
@@ -242,22 +250,25 @@ var edgeWritePmKey = edge.func(function () {/*
 
             SetHeader(CMD_RETURNKCDLCL, RetMsg.hdr1);
 
+            string opId = "", opFirst = "", opLast = "";
+
             RetMsg.ff = Cmd;
-            RetMsg.Dta = TmpDta;
+            RetMsg.Dta = TmpDta.ToCharArray();
             RetMsg.Debug = false;
-            RetMsg.szOpID = "";
-            RetMsg.szOpFirst = "";
-            RetMsg.szOpLast = "";
+            RetMsg.szOpID = opId.ToCharArray();
+            RetMsg.szOpFirst = opFirst.ToCharArray();
+            RetMsg.szOpLast = opLast.ToCharArray();
 
             NetworkStream serverStream = clientSocket.GetStream();   
 
-            byte[] outStream = ObjectToByteArray(RetMsg);
+            byte[] outStream = getRetBytes(RetMsg);
             serverStream.Write(outStream, 0, outStream.Length);
             serverStream.Flush();    
 
             byte[] inStream = new byte[10025];
             serverStream.Read(inStream, 0, (int)clientSocket.ReceiveBufferSize);
-            string returndata = System.Text.Encoding.ASCII.GetString(inStream);   
+            string returndata = System.Text.Encoding.ASCII.GetString(inStream); 
+            resArr[1] = returndata;  
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
@@ -271,7 +282,7 @@ var edgeWritePmKey = edge.func(function () {/*
                 byte blk_add = Convert.ToByte(blk_list[i], 16);
 
                 string subHexString = keycardData.Substring(8 * i, 8);
-                resArr[i+1] = subHexString;
+                resArr[i+2] = subHexString;
 
                 string bufferStr = "";
                 bufferStr = formatStr(subHexString, -1);
