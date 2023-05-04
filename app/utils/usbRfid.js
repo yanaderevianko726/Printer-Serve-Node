@@ -54,13 +54,16 @@ var edgeWritePmKey = edge.func(function () {/*
 
     public class Startup
     {
+        [DllImport("kernel32.dll", SetLastError = true)]
+        static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
+
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
-        [DllImport("pmsif.dll")]
+        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll", CharSet = CharSet.Auto, EntryPoint = "PMSifRegister", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
         public static extern int PMSifRegister(string szLicense, string szAppl);
 
-        [DllImport("pmsif.dll")]
+        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll", CharSet = CharSet.Auto, EntryPoint = "PMSifReturnKcdLcl", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
         public static extern string PMSifReturnKcdLcl(char ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
         private string formatStr(string str, int num_blk)
@@ -128,8 +131,8 @@ var edgeWritePmKey = edge.func(function () {/*
             resArr[1] = regVal.ToString();  
 
             string sysId = "7289", opFirst = "Jason", opLast = "Phillips";
-            string returnKey = PMSifReturnKcdLcl('G', TmpDta, false, sysId, opFirst, opLast); 
-            resArr[2] = returnKey;           
+            // string returnKey = PMSifReturnKcdLcl('G', TmpDta, false, sysId, opFirst, opLast); 
+            // resArr[2] = returnKey; 
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
