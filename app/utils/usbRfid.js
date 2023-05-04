@@ -64,7 +64,7 @@ var edgeWritePmKey = edge.func(function () {/*
         public static extern int PMSifRegister(string szLicense, string szAppl);
 
         [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll", CharSet = CharSet.Auto, EntryPoint = "PMSifReturnKcdLcl", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
-        public static extern string PMSifReturnKcdLcl(char ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+        public static extern string PMSifReturnKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
         private string formatStr(string str, int num_blk)
         {            
@@ -130,9 +130,8 @@ var edgeWritePmKey = edge.func(function () {/*
             resArr[0] = TmpDta;
             resArr[1] = regVal.ToString();  
 
-            string sysId = "7289", opFirst = "Jason", opLast = "Phillips";
-            // string returnKey = PMSifReturnKcdLcl('G', TmpDta, false, sysId, opFirst, opLast); 
-            // resArr[2] = returnKey; 
+            //string returnKey = PMSifReturnKcdLcl("G", TmpDta, false, "7289", "Jason", "Phillips"); 
+            //resArr[2] = returnKey; 
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
