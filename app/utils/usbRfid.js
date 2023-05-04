@@ -31,6 +31,7 @@ var edgeWritePmKey = edge.func(function () {/*
         public int ui32BodySize;  
     }
 
+    [Serializable]
     struct SPMSifRegisterMsg
     {
         public SPMSifHdr hdr1; 
@@ -39,6 +40,7 @@ var edgeWritePmKey = edge.func(function () {/*
         public int nRet;  
     }
 
+    [Serializable]
     struct SPMSifUnregisterMsg
     {
         public SPMSifHdr hdr1; 
@@ -57,6 +59,7 @@ var edgeWritePmKey = edge.func(function () {/*
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] public char[] szOpLast; 
     }
 
+    [Serializable]
     struct SPMSifVerifyKcdLclMsg
     {
         public SPMSifHdr hdr1; 
@@ -70,6 +73,7 @@ var edgeWritePmKey = edge.func(function () {/*
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] public char[] szOpLast; 
     }
 
+    [Serializable]
     struct SPMSifEncodeKcdLclMsg
     {
         public SPMSifHdr hdr1; 
