@@ -16,6 +16,7 @@ var edgeWritePmKey = edge.func(function () {/*
     using System.Diagnostics;
     using System.Threading;
     using System.Text.RegularExpressions;
+    using System.Net;
     using System.Net.Sockets;
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Runtime.Serialization;
@@ -123,8 +124,6 @@ var edgeWritePmKey = edge.func(function () {/*
         const int CMD_VERIFYKCDLCL = 12;
         const int TCP_PORT = 3015;
 
-        System.Net.Sockets.TcpClient clientSocket = new System.Net.Sockets.TcpClient();
-
         private void SetHeader(int TCmd, SPMSifHdr hdr){
             hdr.ui32Synch1 = Convert.ToUInt32("55555555", 16);
             hdr.ui32Synch2 = Convert.ToUInt32("AAAAAAAA", 16);
@@ -153,10 +152,6 @@ var edgeWritePmKey = edge.func(function () {/*
                     break;
             }
             return res;
-        }
-
-        private void connectServer() {
-            clientSocket.Connect("127.0.0.1", TCP_PORT);
         }
 
         private string formatStr(string str, int num_blk)
@@ -198,8 +193,6 @@ var edgeWritePmKey = edge.func(function () {/*
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
 
-            connectServer();
-
             string TmpDta = "";
 
             int unicode = 30;  // Record Separator
@@ -233,41 +226,53 @@ var edgeWritePmKey = edge.func(function () {/*
 
             string[] resArr = new string[14];
             resArr[0] = TmpDta;
-
-            char Cmd = 'G';
+            
+            string licenseCode = "42860149";
+            string appName = "42860149";
+            string sysId = "VingCard", opFirst = "Demo1", opLast = "VingCard";
 
             SPMSifReturnKcdLclMsg RetMsg = new SPMSifReturnKcdLclMsg();
-            int sz = Marshal.SizeOf(typeof(SPMSifReturnKcdLclMsg));
-            byte[] outStream = new byte[sz];
-
-            int indexMsg = 0;
-            foreach (var element in outStream)
-            {
-                outStream[indexMsg] = 0;
-                indexMsg++;
-            }
-
             SetHeader(CMD_RETURNKCDLCL, RetMsg.hdr1);
 
-            string opId = "", opFirst = "", opLast = "";
-
-            RetMsg.ff = Cmd;
+            RetMsg.ff = 'G';
             RetMsg.Dta = TmpDta.ToCharArray();
             RetMsg.Debug = false;
-            RetMsg.szOpID = opId.ToCharArray();
+            RetMsg.szOpID = sysId.ToCharArray();
             RetMsg.szOpFirst = opFirst.ToCharArray();
             RetMsg.szOpLast = opLast.ToCharArray();
+            
+            IPAddress ipAddress = IPAddress.Parse("192.168.20.11");
+            IPEndPoint remoteEP = new IPEndPoint(ipAddress, TCP_PORT);
 
-            NetworkStream serverStream = clientSocket.GetStream();   
+            Socket sender = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            outStream = Serialize(RetMsg);
-            serverStream.Write(outStream, 0, outStream.Length);
+            int retSize = Marshal.SizeOf(typeof(SPMSifVerifyKcdLclMsg));
+            byte[] bytes = new byte[retSize];
 
-            int readSz = (int) clientSocket.ReceiveBufferSize;
-            byte[] inStream = new byte[readSz];
-            serverStream.Read(inStream, 0, readSz);
-            string returndata = System.Text.Encoding.ASCII.GetString(inStream); 
-            resArr[1] = returndata;  
+            try
+            {
+                sender.Connect(remoteEP);
+                byte[] msg = Serialize(RetMsg);
+                int bytesSent = sender.Send(msg);
+                
+                int bytesRec = sender.Receive(bytes);
+                resArr[1] = bytesRec.ToString();
+                sender.Shutdown(SocketShutdown.Both);
+                sender.Close();
+
+            }
+            catch (ArgumentNullException ane)
+            {
+                resArr[1] = ane.ToString();
+            }
+            catch (SocketException se)
+            {
+                resArr[1] = se.ToString();
+            }
+            catch (Exception e)
+            {
+                resArr[1] = e.ToString();
+            } 
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
