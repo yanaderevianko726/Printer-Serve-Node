@@ -243,14 +243,17 @@ var edgeWritePmKey = edge.func(function () {/*
                 SPMSifRegisterMsg MsgReg = new SPMSifRegisterMsg();
                 SetHeader(CMD_REGISTER, MsgReg.hdr1);
 
+                int sz = Marshal.SizeOf(typeof(SPMSifRegisterMsg));
+                byte[] resRegBytes = new byte[sz];
+
                 MsgReg.szLicense = licenseCode.ToCharArray();
                 MsgReg.szApplName = appName.ToCharArray();
 
                 byte[] msgRegBytes = Serialize(MsgReg);
                 int bytesRegSent = sender.Send(msgRegBytes);
 
-                int resRegBytes = sender.Receive(bytesRegSent);
-                resArr[1] = resRegBytes.ToString();
+                int resRegInt = sender.Receive(resRegBytes);
+                resArr[1] = resRegInt.ToString();
 
                 sender.Shutdown(SocketShutdown.Both);
                 sender.Close();
