@@ -54,16 +54,16 @@ var edgeWritePmKey = edge.func(function () {/*
 
     public class Startup
     {
-        [DllImport("kernel32.dll", SetLastError = true)]
-        static extern IntPtr GetProcAddress(IntPtr hModule, string lpProcName);
-
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
-        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll", CharSet = CharSet.Auto, EntryPoint = "PMSifRegister", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
         public static extern int PMSifRegister(string szLicense, string szAppl);
 
-        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll", CharSet = CharSet.Auto, EntryPoint = "PMSifReturnKcdLcl", CallingConvention = CallingConvention.StdCall, SetLastError = true)]
+        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
+        public static extern int PMSifUnregister();
+
+        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
         public static extern string PMSifReturnKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
         private string formatStr(string str, int num_blk)
@@ -89,11 +89,6 @@ var edgeWritePmKey = edge.func(function () {/*
         {   
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
-
-            string licenseCode = "42860149";
-            string appName = "Test_Program";
-
-            int regVal = PMSifRegister(licenseCode, appName);
 
             string TmpDta = "";
 
@@ -126,12 +121,16 @@ var edgeWritePmKey = edge.func(function () {/*
 
             TmpDta += recordSp + "J5";
 
-            string[] resArr = new string[15];
-            resArr[0] = TmpDta;
-            resArr[1] = regVal.ToString();  
+            string[] resArr = new string[16];
+            resArr[0] = TmpDta; 
 
+            int regVal = PMSifRegister("42860149", "Test_Program");
             //string returnKey = PMSifReturnKcdLcl("G", TmpDta, false, "7289", "Jason", "Phillips"); 
-            //resArr[2] = returnKey; 
+            //int unRegVal = PMSifUnregister();
+
+            resArr[1] = regVal.ToString(); 
+            resArr[2] = "returnKey"; 
+            resArr[3] = "unRegVal"; 
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
@@ -145,7 +144,7 @@ var edgeWritePmKey = edge.func(function () {/*
                 byte blk_add = Convert.ToByte(blk_list[i], 16);
 
                 string subHexString = keycardData.Substring(8 * i, 8);
-                resArr[i+3] = subHexString;
+                resArr[i+4] = subHexString;
 
                 string bufferStr = "";
                 bufferStr = formatStr(subHexString, -1);
