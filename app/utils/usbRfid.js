@@ -228,35 +228,30 @@ var edgeWritePmKey = edge.func(function () {/*
             resArr[0] = TmpDta;
             
             string licenseCode = "42860149";
-            string appName = "42860149";
-            string sysId = "VingCard", opFirst = "Demo1", opLast = "VingCard";
-
-            SPMSifReturnKcdLclMsg RetMsg = new SPMSifReturnKcdLclMsg();
-            SetHeader(CMD_RETURNKCDLCL, RetMsg.hdr1);
-
-            RetMsg.ff = 'G';
-            RetMsg.Dta = TmpDta.ToCharArray();
-            RetMsg.Debug = false;
-            RetMsg.szOpID = sysId.ToCharArray();
-            RetMsg.szOpFirst = opFirst.ToCharArray();
-            RetMsg.szOpLast = opLast.ToCharArray();
+            string appName = "Test_Program";
+            string sysId = "7289", opFirst = "Jason", opLast = "Phillips";
             
             IPAddress ipAddress = IPAddress.Parse("192.168.20.11");
             IPEndPoint remoteEP = new IPEndPoint(ipAddress, TCP_PORT);
 
             Socket sender = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            int retSize = Marshal.SizeOf(typeof(SPMSifVerifyKcdLclMsg));
-            byte[] bytes = new byte[retSize];
-
             try
             {
                 sender.Connect(remoteEP);
-                byte[] msg = Serialize(RetMsg);
-                int bytesSent = sender.Send(msg);
-                
-                int bytesRec = sender.Receive(bytes);
-                resArr[1] = bytesRec.ToString();
+
+                SPMSifRegisterMsg MsgReg = new SPMSifRegisterMsg();
+                SetHeader(CMD_REGISTER, MsgReg.hdr1);
+
+                MsgReg.szLicense = licenseCode.ToCharArray();
+                MsgReg.szApplName = appName.ToCharArray();
+
+                byte[] msgRegBytes = Serialize(MsgReg);
+                int bytesRegSent = sender.Send(msgRegBytes);
+
+                int resRegBytes = sender.Receive(bytesRegSent);
+                resArr[1] = resRegBytes.ToString();
+
                 sender.Shutdown(SocketShutdown.Both);
                 sender.Close();
 
