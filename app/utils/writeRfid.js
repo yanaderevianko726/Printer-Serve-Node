@@ -77,12 +77,12 @@ WriteRFID.sendCardToReadPos = (rfidModel, result) => {
 
 WriteRFID.sendCardToTakePos = (rfidModel, result) => {
     res2 = '';
-    let cmd = Buffer.from([0x02, 0x30, 0x30, 0x00, 0x03, 0x46, 0x43, 0x30, 0x03, 0x37])
+    let cmd = Buffer.from([0x02, 0x30, 0x30, 0x00, 0x03, 0x46, 0x43, 0x34, 0x03, 0x33])
     comPort1.write(cmd, function (err) {
         if (err) {
             result(null, { retInt: 1, ...rfidModel });
         } else {
-            console.log("-- Com1 wrote with: 02 30 30 00 03 46 43 37 03 30");
+            console.log("-- Com1 wrote with: 02 30 30 00 03 46 43 34 03 33");
             result(null, { retInt: 0, ...rfidModel });
         }
     });
