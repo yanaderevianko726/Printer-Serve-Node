@@ -21,70 +21,6 @@ var edgeWritePmKey = edge.func(function () {/*
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Runtime.Serialization;
 
-    [Serializable]
-    struct SPMSifHdr
-    {
-        public uint ui32Synch1;  
-        public uint ui32Synch2;  
-        public ushort ui16Version;  
-        public int ui32Cmd;  
-        public int ui32BodySize;  
-    }
-
-    [Serializable]
-    struct SPMSifRegisterMsg
-    {
-        public SPMSifHdr hdr1; 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)] public char[] szLicense; 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 20)] public char[] szApplName; 
-        public int nRet;  
-    }
-
-    [Serializable]
-    struct SPMSifUnregisterMsg
-    {
-        public SPMSifHdr hdr1; 
-        public int nRet;  
-    }
-
-    [Serializable]
-    struct SPMSifReturnKcdLclMsg
-    {
-        public SPMSifHdr hdr1; 
-        public char ff; 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)] public char[] Dta; 
-        public bool Debug;  
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)] public char[] szOpID; 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] public char[] szOpFirst; 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] public char[] szOpLast; 
-    }
-
-    [Serializable]
-    struct SPMSifVerifyKcdLclMsg
-    {
-        public SPMSifHdr hdr1; 
-        public char ff; 
-        public char gg; 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 266)] public char[] Kcd; 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 512)] public char[] Dta; 
-        public bool Debug;  
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)] public char[] szOpID; 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] public char[] szOpFirst; 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)] public char[] szOpLast; 
-    }
-
-    [Serializable]
-    struct SPMSifEncodeKcdLclMsg
-    {
-        public SPMSifHdr hdr1; 
-        public char ff; 
-        public char[] Dta; 
-        public bool Debug;  
-        public char[] szOpID; 
-        public char[] szOpFirst; 
-        public char[] szOpLast; 
-    }
-
     public class ClsPdf
     {
         public string firstName = "";
@@ -121,42 +57,11 @@ var edgeWritePmKey = edge.func(function () {/*
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
-        const int CMD_REGISTER = 1;
-        const int CMD_UNREGISTER = 2;
-        const int CMD_ENCODEKCDLCL = 3;
-        const int CMD_RETURNKCDLCL = 5;
-        const int CMD_VERIFYKCDLCL = 12;
-        const int TCP_PORT = 3015;
+        [DllImport("pmsif.dll")]
+        public static extern int PMSifRegister(string szLicense, string szAppl);
 
-        private void SetHeader(int TCmd, SPMSifHdr hdr){
-            hdr.ui32Synch1 = Convert.ToUInt32("55555555", 16);
-            hdr.ui32Synch2 = Convert.ToUInt32("AAAAAAAA", 16);
-            hdr.ui16Version = 1;
-            hdr.ui32Cmd = TCmd;
-            hdr.ui32BodySize = GetSize(TCmd) - Marshal.SizeOf(typeof(SPMSifHdr));
-        }
-
-        private int GetSize(int TCmd) {
-            int res = Marshal.SizeOf(typeof(SPMSifHdr));
-            switch(TCmd){
-                case CMD_REGISTER:
-                    res = Marshal.SizeOf(typeof(SPMSifRegisterMsg));
-                    break;
-                case CMD_UNREGISTER:
-                    res = Marshal.SizeOf(typeof(SPMSifUnregisterMsg));
-                    break;
-                case CMD_ENCODEKCDLCL:
-                    res = Marshal.SizeOf(typeof(SPMSifEncodeKcdLclMsg));
-                    break;
-                case CMD_RETURNKCDLCL:
-                    res = Marshal.SizeOf(typeof(SPMSifReturnKcdLclMsg));
-                    break;
-                case CMD_VERIFYKCDLCL:
-                    res = Marshal.SizeOf(typeof(SPMSifVerifyKcdLclMsg));
-                    break;
-            }
-            return res;
-        }
+        [DllImport("pmsif.dll")]
+        public static extern string PMSifReturnKcdLcl(char ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
         private string formatStr(string str, int num_blk)
         {            
@@ -177,25 +82,15 @@ var edgeWritePmKey = edge.func(function () {/*
             }
         }
 
-        public static byte[] Serialize<T>(T data) where T : struct
-        {
-            var formatter = new BinaryFormatter();
-            var stream = new MemoryStream();
-            formatter.Serialize(stream, data);
-            return stream.ToArray();
-        }
-
-        public static T Deserialize<T>(byte[] array) where T : struct
-        {
-            var stream = new MemoryStream(array);
-            var formatter = new BinaryFormatter();
-            return (T)formatter.Deserialize(stream);
-        }
-
         public async Task<object> Invoke(dynamic input)
         {   
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
+
+            string licenseCode = "42860149";
+            string appName = "Test_Program";
+
+            int regVal = PMSifRegister(licenseCode, appName);
 
             string TmpDta = "";
 
@@ -228,54 +123,13 @@ var edgeWritePmKey = edge.func(function () {/*
 
             TmpDta += recordSp + "J5";
 
-            string[] resArr = new string[14];
+            string[] resArr = new string[15];
             resArr[0] = TmpDta;
-            
-            string licenseCode = "42860149";
-            string appName = "Test_Program";
+            resArr[1] = regVal.ToString();  
+
             string sysId = "7289", opFirst = "Jason", opLast = "Phillips";
-            
-            IPAddress ipAddress = IPAddress.Parse("192.168.20.11");
-            IPEndPoint remoteEP = new IPEndPoint(ipAddress, TCP_PORT);
-
-            Socket sender = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-
-            try
-            {
-                sender.Connect(remoteEP);
-
-                SPMSifRegisterMsg MsgReg = new SPMSifRegisterMsg();
-                SetHeader(CMD_REGISTER, MsgReg.hdr1);
-
-                MsgReg.szLicense = licenseCode.ToCharArray();
-                MsgReg.szApplName = appName.ToCharArray();
-
-                byte[] msgRegBytes = Serialize(MsgReg);
-                int bytesRegSent = sender.Send(msgRegBytes);
-                resArr[1] = bytesRegSent.ToString();
-
-                // int sz = Marshal.SizeOf(typeof(SPMSifRegisterMsg));
-                // byte[] resRegBytes = new byte[sz];
-
-                // int resRegInt = sender.Receive(resRegBytes);
-                // resArr[1] = resRegInt.ToString();
-
-                sender.Shutdown(SocketShutdown.Both);
-                sender.Close();
-
-            }
-            catch (ArgumentNullException ane)
-            {
-                resArr[1] = "ArgumentNullException: " + ane.ToString();
-            }
-            catch (SocketException se)
-            {
-                resArr[1] = "SocketException: " + se.ToString();
-            }
-            catch (Exception e)
-            {
-                resArr[1] = "Exception: " + e.ToString();
-            } 
+            string returnKey = PMSifReturnKcdLcl('G', TmpDta, false, sysId, opFirst, opLast); 
+            resArr[2] = returnKey;           
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
@@ -289,7 +143,7 @@ var edgeWritePmKey = edge.func(function () {/*
                 byte blk_add = Convert.ToByte(blk_list[i], 16);
 
                 string subHexString = keycardData.Substring(8 * i, 8);
-                resArr[i+2] = subHexString;
+                resArr[i+3] = subHexString;
 
                 string bufferStr = "";
                 bufferStr = formatStr(subHexString, -1);
