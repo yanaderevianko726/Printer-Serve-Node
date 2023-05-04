@@ -247,17 +247,18 @@ var edgeWritePmKey = edge.func(function () {/*
                 SPMSifRegisterMsg MsgReg = new SPMSifRegisterMsg();
                 SetHeader(CMD_REGISTER, MsgReg.hdr1);
 
-                int sz = Marshal.SizeOf(typeof(SPMSifRegisterMsg));
-                byte[] resRegBytes = new byte[sz];
-
                 MsgReg.szLicense = licenseCode.ToCharArray();
                 MsgReg.szApplName = appName.ToCharArray();
 
                 byte[] msgRegBytes = Serialize(MsgReg);
                 int bytesRegSent = sender.Send(msgRegBytes);
+                resArr[1] = bytesRegSent.ToString();
 
-                int resRegInt = sender.Receive(resRegBytes);
-                resArr[1] = resRegInt.ToString();
+                // int sz = Marshal.SizeOf(typeof(SPMSifRegisterMsg));
+                // byte[] resRegBytes = new byte[sz];
+
+                // int resRegInt = sender.Receive(resRegBytes);
+                // resArr[1] = resRegInt.ToString();
 
                 sender.Shutdown(SocketShutdown.Both);
                 sender.Close();
@@ -265,15 +266,15 @@ var edgeWritePmKey = edge.func(function () {/*
             }
             catch (ArgumentNullException ane)
             {
-                resArr[1] = ane.ToString();
+                resArr[1] = "ArgumentNullException: " + ane.ToString();
             }
             catch (SocketException se)
             {
-                resArr[1] = se.ToString();
+                resArr[1] = "SocketException: " + se.ToString();
             }
             catch (Exception e)
             {
-                resArr[1] = e.ToString();
+                resArr[1] = "Exception: " + e.ToString();
             } 
 
             byte mode = 0x00;
