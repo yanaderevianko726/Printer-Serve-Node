@@ -16,8 +16,74 @@ var edgeWritePmKey = edge.func(function () {/*
     using System.Diagnostics;
     using System.Threading;
     using System.Text.RegularExpressions;
+    using System.Net;
+    using System.Net.Sockets;
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Runtime.Serialization;
+
+    [Serializable]
+    struct SPMSifHdr
+    {
+        public uint ui32Synch1;  
+        public uint ui32Synch2;  
+        public ushort ui16Version;  
+        public int ui32Cmd;  
+        public int ui32BodySize;  
+    }
+
+    [Serializable]
+    struct SPMSifRegisterMsg
+    {
+        public SPMSifHdr hdr1; 
+        public string szLicense; 
+        public string szApplName; 
+        public int nRet;  
+    }
+
+    [Serializable]
+    struct SPMSifUnregisterMsg
+    {
+        public SPMSifHdr hdr1; 
+        public int nRet;  
+    }
+
+    [Serializable]
+    struct SPMSifReturnKcdLclMsg
+    {
+        public SPMSifHdr hdr1; 
+        public char ff; 
+        public string Dta; 
+        public bool Debug;  
+        public string szOpID; 
+        public string szOpFirst; 
+        public string szOpLast; 
+    }
+
+    [Serializable]
+    struct SPMSifVerifyKcdLclMsg
+    {
+        public SPMSifHdr hdr1; 
+        public char ff; 
+        public char gg; 
+        public string Kcd; 
+        public string Dta; 
+        public bool Debug;  
+        public string szOpID; 
+        public string szOpFirst; 
+        public string szOpLast; 
+    }
+
+    [Serializable]
+    struct SPMSifEncodeKcdLclMsg
+    {
+        public SPMSifHdr hdr1; 
+        public char ff; 
+        public string Dta; 
+        public bool Debug;  
+        public string szOpID; 
+        public string szOpFirst; 
+        public string szOpLast; 
+    }
 
     public class ClsPdf
     {
@@ -52,21 +118,45 @@ var edgeWritePmKey = edge.func(function () {/*
 
     public class Startup
     {
-        [DllImport("kernel32.dll")]
-        static extern IntPtr LoadLibrary(string dllName);
-
-        [DllImport("kernel32.dll")]
-        static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
-
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
-        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern int PMSifUnregister();
+        const int CMD_REGISTER = 1;
+        const int CMD_UNREGISTER = 2;
+        const int CMD_ENCODEKCDLCL = 3;
+        const int CMD_RETURNKCDLCL = 5;
+        const int CMD_VERIFYKCDLCL = 12;
+        const int TCP_PORT = 3015;
 
-        private delegate int SPMSifRegister([MarshalAs(UnmanagedType.LPStr)]string szLicense, [MarshalAs(UnmanagedType.LPStr)]string szAppl);
+        private void SetHeader(int TCmd, SPMSifHdr hdr){
+            hdr.ui32Synch1 = Convert.ToUInt32("55555555", 16);
+            hdr.ui32Synch2 = Convert.ToUInt32("AAAAAAAA", 16);
+            hdr.ui16Version = 1;
+            hdr.ui32Cmd = TCmd;
+            hdr.ui32BodySize = GetSize(TCmd) - Marshal.SizeOf(typeof(SPMSifHdr));
+        }
 
-        private delegate string SPMSifReturnKcdLcl([MarshalAs(UnmanagedType.LPStr)]string ff, [MarshalAs(UnmanagedType.LPStr)]string Dta, bool Dbg, [MarshalAs(UnmanagedType.LPStr)]string szOpId, [MarshalAs(UnmanagedType.LPStr)]string szOpFirst, [MarshalAs(UnmanagedType.LPStr)]string szOpLast);
+        private int GetSize(int TCmd) {
+            int res = Marshal.SizeOf(typeof(SPMSifHdr));
+            switch(TCmd){
+                case CMD_REGISTER:
+                    res = Marshal.SizeOf(typeof(SPMSifRegisterMsg));
+                    break;
+                case CMD_UNREGISTER:
+                    res = Marshal.SizeOf(typeof(SPMSifUnregisterMsg));
+                    break;
+                case CMD_ENCODEKCDLCL:
+                    res = Marshal.SizeOf(typeof(SPMSifEncodeKcdLclMsg));
+                    break;
+                case CMD_RETURNKCDLCL:
+                    res = Marshal.SizeOf(typeof(SPMSifReturnKcdLclMsg));
+                    break;
+                case CMD_VERIFYKCDLCL:
+                    res = Marshal.SizeOf(typeof(SPMSifVerifyKcdLclMsg));
+                    break;
+            }
+            return res;
+        }
 
         private string formatStr(string str, int num_blk)
         {            
@@ -85,6 +175,21 @@ var edgeWritePmKey = edge.func(function () {/*
             for (int i = 0; i < length; i++) {
                 after[i] = Convert.ToByte(before.Substring(2 * i, 2), 16);
             }
+        }
+
+        public static byte[] Serialize<T>(T data) where T : struct
+        {
+            var formatter = new BinaryFormatter();
+            var stream = new MemoryStream();
+            formatter.Serialize(stream, data);
+            return stream.ToArray();
+        }
+
+        public static T Deserialize<T>(byte[] array) where T : struct
+        {
+            var stream = new MemoryStream(array);
+            var formatter = new BinaryFormatter();
+            return (T)formatter.Deserialize(stream);
         }
 
         public async Task<object> Invoke(dynamic input)
@@ -123,27 +228,54 @@ var edgeWritePmKey = edge.func(function () {/*
 
             TmpDta += recordSp + "J5";
 
-            string[] resArr = new string[16];
-            resArr[0] = TmpDta; 
+            string[] resArr = new string[14];
+            resArr[0] = TmpDta;
+            
+            string licenseCode = "42860149";
+            string appName = "Test_Program";
+            string sysId = "7289", opFirst = "Jason", opLast = "Phillips";
+            
+            IPAddress ipAddress = IPAddress.Parse("127.0.0.1");
+            IPEndPoint remoteEP = new IPEndPoint(ipAddress, TCP_PORT);
 
-            //IntPtr pmsApi = LoadLibrary(@"C:\Program Files (x86)\ASSA ABLOY\Vision\tcppmsif.dll");
+            Socket sender = new Socket(ipAddress.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
 
-            //IntPtr pmsReg = GetProcAddress(pmsApi, "PMSifRegister"); 
-            //SPMSifRegister spmsReg = (SPMSifRegister) Marshal.GetDelegateForFunctionPointer(pmsReg, typeof(SPMSifRegister));
+            try
+            {
+                sender.Connect(remoteEP);
 
-            //IntPtr pmsRet = GetProcAddress(pmsApi, "PMSifReturnKcdLcl"); 
-            //SPMSifReturnKcdLcl spmsRet = (SPMSifReturnKcdLcl) Marshal.GetDelegateForFunctionPointer(pmsRet, typeof(SPMSifReturnKcdLcl));
+                SPMSifRegisterMsg MsgReg = new SPMSifRegisterMsg();
+                SetHeader(CMD_REGISTER, MsgReg.hdr1);
 
-            //int regVal = spmsReg("42860149", "Test_Program");
+                MsgReg.szLicense = licenseCode;
+                MsgReg.szApplName = appName;
 
-            //int unicodeG = 65;  // Record Separator
-            //char characterG = (char) unicodeG;
+                byte[] msgRegBytes = Serialize(MsgReg);
+                int sendVal = sender.Send(msgRegBytes);
+                resArr[1] = sendVal.ToString();
 
-            //string returnKey = spmsRet(characterG.ToString(), TmpDta, false, "7289", "Jason", "Phillips"); 
+                // int sz = Marshal.SizeOf(typeof(SPMSifRegisterMsg));
+                // byte[] resRegBytes = new byte[sz];
 
-            resArr[1] = "regVal"; 
-            resArr[2] = "returnKey"; 
-            resArr[3] = "unRegVal"; 
+                // int resRegInt = sender.Receive(resRegBytes);
+                // resArr[1] = resRegInt.ToString();
+
+                sender.Shutdown(SocketShutdown.Both);
+                sender.Close();
+
+            }
+            catch (ArgumentNullException ane)
+            {
+                resArr[1] = "ArgumentNullException: " + ane.ToString();
+            }
+            catch (SocketException se)
+            {
+                resArr[1] = "SocketException: " + se.ToString();
+            }
+            catch (Exception e)
+            {
+                resArr[1] = "Exception: " + e.ToString();
+            } 
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
@@ -157,7 +289,7 @@ var edgeWritePmKey = edge.func(function () {/*
                 byte blk_add = Convert.ToByte(blk_list[i], 16);
 
                 string subHexString = keycardData.Substring(8 * i, 8);
-                resArr[i+4] = subHexString;
+                resArr[i+2] = subHexString;
 
                 string bufferStr = "";
                 bufferStr = formatStr(subHexString, -1);
