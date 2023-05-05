@@ -260,9 +260,6 @@ var edgeWritePmKey = edge.func(function () {/*
                 // int resRegInt = sender.Receive(resRegBytes);
                 // resArr[1] = resRegInt.ToString();
 
-                sender.Shutdown(SocketShutdown.Both);
-                sender.Close();
-
             }
             catch (ArgumentNullException ane)
             {
