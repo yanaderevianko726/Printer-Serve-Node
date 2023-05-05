@@ -16,8 +16,6 @@ var edgeWritePmKey = edge.func(function () {/*
     using System.Diagnostics;
     using System.Threading;
     using System.Text.RegularExpressions;
-    using System.Net;
-    using System.Net.Sockets;
     using System.Runtime.Serialization.Formatters.Binary;
     using System.Runtime.Serialization;
 
@@ -54,17 +52,21 @@ var edgeWritePmKey = edge.func(function () {/*
 
     public class Startup
     {
+        [DllImport("kernel32.dll")]
+        static extern IntPtr LoadLibrary(string dllName);
+
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
         [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern int PMSifRegister(string szLicense, string szAppl);
-
-        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
         public static extern int PMSifUnregister();
 
-        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern string PMSifReturnKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+        private delegate int SPMSifRegister([MarshalAs(UnmanagedType.LPStr)]string szLicense, [MarshalAs(UnmanagedType.LPStr)]string szAppl);
+
+        private delegate string SPMSifReturnKcdLcl([MarshalAs(UnmanagedType.LPStr)]string ff, [MarshalAs(UnmanagedType.LPStr)]string Dta, bool Dbg, [MarshalAs(UnmanagedType.LPStr)]string szOpId, [MarshalAs(UnmanagedType.LPStr)]string szOpFirst, [MarshalAs(UnmanagedType.LPStr)]string szOpLast);
 
         private string formatStr(string str, int num_blk)
         {            
@@ -124,9 +126,15 @@ var edgeWritePmKey = edge.func(function () {/*
             string[] resArr = new string[16];
             resArr[0] = TmpDta; 
 
-            int regVal = PMSifRegister("42860149", "Test_Program");
-            //string returnKey = PMSifReturnKcdLcl("G", TmpDta, false, "7289", "Jason", "Phillips"); 
+            //int regVal = PMSifRegister("42860149", "Test_Program");
+            //string returnKey = PMSifReturnKcdLcl("G", TmpDta, false, "VingCard 1", "VingCard", "Demo1"); 
             //int unRegVal = PMSifUnregister();
+
+            IntPtr pmsApi = LoadLibrary(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll");
+            IntPtr pmsReg = GetProcAddress(pmsApi, "PMSifRegister"); 
+            SPMSifRegister spmsReg = (SPMSifRegister) Marshal.GetDelegateForFunctionPointer(pmsReg, typeof(SPMSifRegister));
+
+            int regVal = spmsReg("42860149", "Test_Program");
 
             resArr[1] = regVal.ToString(); 
             resArr[2] = "returnKey"; 
