@@ -102,10 +102,10 @@ var edgeWritePmKey = edge.func(function () {/*
             string rNum = "101";
             TmpDta += recordSp + "R" + rNum;
 
-            TmpDta += recordSp + "TSINGLE";
+            TmpDta += recordSp + "TSingle Room";
             TmpDta += recordSp + "F" + clsPdf.firstName;
             TmpDta += recordSp + "N" + clsPdf.lastName;
-            TmpDta += recordSp + "UGUEST";
+            TmpDta += recordSp + "URegular Guest";
 
             string[] sDate0 = clsPdf.startedAt.Split(' ');
             string[] sDate1 = sDate0[0].Split('-');
@@ -126,17 +126,22 @@ var edgeWritePmKey = edge.func(function () {/*
             string[] resArr = new string[16];
             resArr[0] = TmpDta; 
 
-            //int regVal = PMSifRegister("42860149", "Test_Program");
-            //string returnKey = PMSifReturnKcdLcl("G", TmpDta, false, "VingCard 1", "VingCard", "Demo1"); 
-            //int unRegVal = PMSifUnregister();
+            //IntPtr pmsApi = LoadLibrary(@"C:\Program Files (x86)\ASSA ABLOY\Vision\tcppmsif.dll");
 
-            IntPtr pmsApi = LoadLibrary(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll");
-            IntPtr pmsReg = GetProcAddress(pmsApi, "PMSifRegister"); 
-            SPMSifRegister spmsReg = (SPMSifRegister) Marshal.GetDelegateForFunctionPointer(pmsReg, typeof(SPMSifRegister));
+            //IntPtr pmsReg = GetProcAddress(pmsApi, "PMSifRegister"); 
+            //SPMSifRegister spmsReg = (SPMSifRegister) Marshal.GetDelegateForFunctionPointer(pmsReg, typeof(SPMSifRegister));
 
-            int regVal = spmsReg("42860149", "Test_Program");
+            //IntPtr pmsRet = GetProcAddress(pmsApi, "PMSifReturnKcdLcl"); 
+            //SPMSifReturnKcdLcl spmsRet = (SPMSifReturnKcdLcl) Marshal.GetDelegateForFunctionPointer(pmsRet, typeof(SPMSifReturnKcdLcl));
 
-            resArr[1] = regVal.ToString(); 
+            //int regVal = spmsReg("42860149", "Test_Program");
+
+            //int unicodeG = 65;  // Record Separator
+            //char characterG = (char) unicodeG;
+
+            //string returnKey = spmsRet(characterG.ToString(), TmpDta, false, "7289", "Jason", "Phillips"); 
+
+            resArr[1] = "regVal"; 
             resArr[2] = "returnKey"; 
             resArr[3] = "unRegVal"; 
 
