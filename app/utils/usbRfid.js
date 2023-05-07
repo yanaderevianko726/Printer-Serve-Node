@@ -52,21 +52,20 @@ var edgeWritePmKey = edge.func(function () {/*
 
     public class Startup
     {
-        [DllImport("kernel32.dll")]
-        static extern IntPtr LoadLibrary(string dllName);
-
-        [DllImport("kernel32.dll")]
-        static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
-
         [DllImport("function.dll")]
         public static extern int UL_HLRead(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
-        private delegate int SPMSifRegister([MarshalAs(UnmanagedType.LPStr)]string szLicense, [MarshalAs(UnmanagedType.LPStr)]string szAppl);
+        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
+        public static extern int PMSifRegister(string szLicense, string szAppl);
 
-        private delegate void SPMSifEncodeKcdLcl([MarshalAs(UnmanagedType.LPStr)]string ff, [MarshalAs(UnmanagedType.LPStr)]string Dta, bool Dbg, [MarshalAs(UnmanagedType.LPStr)]string szOpId, [MarshalAs(UnmanagedType.LPStr)]string szOpFirst, [MarshalAs(UnmanagedType.LPStr)]string szOpLast);
+        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
+        public static extern string PMSifReturnKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+
+        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
+        public static extern void PMSifEncodeKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
         private string formatStr(string str, int num_blk)
         {            
@@ -205,31 +204,30 @@ var edgeWritePmKey = edge.func(function () {/*
             }
             TmpDta += ascRS + cODate;
 
-            TmpDta += ascRS + "J5";
+            //TmpDta += ascRS + "J5";
             // TmpDta += ascRS + "S" + serialNumber;
-            // TmpDta += null;
+            //TmpDta += null;
 
-            string[] resArr = new string[16];
+            string[] resArr = new string[19];
             resArr[0] = TmpDta; 
 
-            IntPtr pmsApi = LoadLibrary(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll");
+            Directory.SetCurrentDirectory(@"C:\Program Files (x86)\ASSA ABLOY\Vision");
 
-            IntPtr pmsReg = GetProcAddress(pmsApi, "PMSifRegister"); 
-            SPMSifRegister spmsReg = (SPMSifRegister) Marshal.GetDelegateForFunctionPointer(pmsReg, typeof(SPMSifRegister));
-
-            IntPtr pmsEnc = GetProcAddress(pmsApi, "PMSifEncodeKcdLcl"); 
-            SPMSifEncodeKcdLcl spmsEnc = (SPMSifEncodeKcdLcl) Marshal.GetDelegateForFunctionPointer(pmsEnc, typeof(SPMSifEncodeKcdLcl));
-
-            int regVal = spmsReg("42860149", "Test_Program");
+            int regVal = PMSifRegister("42860149", "Test_Program");
+            resArr[1] = regVal.ToString(); 
 
             int unicodeG = 71;  // Command Code 'G'
             char characterG = (char) unicodeG;
+            string ffStr = characterG.ToString(); 
+            resArr[2] = ffStr;
 
-            spmsEnc(characterG.ToString(), TmpDta, false, "7289", "Jason", "Phillips");  
+            PMSifEncodeKcdLcl(ffStr, TmpDta, false, "7289", "Jason", "Phillips");  
+            //string pmsRetVal = PMSifReturnKcdLcl(characterG.ToString(), TmpDta, false, "7289", "Phillips", "Jason");  
 
-            resArr[1] = regVal.ToString(); 
-            resArr[2] = TmpDta;   
-            resArr[3] = serialNumber;
+            resArr[3] = ffStr;   
+            resArr[4] = TmpDta;   
+            resArr[5] = serialNumber;
+            resArr[6] = Directory.GetCurrentDirectory();
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
@@ -243,7 +241,7 @@ var edgeWritePmKey = edge.func(function () {/*
                 byte blk_add = Convert.ToByte(blk_list[i], 16);
 
                 string subHexString = keycardData.Substring(8 * i, 8);
-                resArr[i+4] = subHexString;
+                resArr[i+7] = subHexString;
 
                 string bufferStr = "";
                 bufferStr = formatStr(subHexString, -1);
