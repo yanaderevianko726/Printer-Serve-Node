@@ -1,13 +1,4 @@
 var edgeCS = require('edge-js');
-var edgeVB = require('edge-vb');
-
-var edgeVBWritePmKey = edgeVB.func('vb', function () {/*
-    Async Function(Input As Object) As Task(Of Object)
-        Return Await Task.Run(Function()
-            Return "NodeJS Welcomes: " & Input.ToString()
-        End Function)
-    End Function
-*/});
 
 var edgeCSWritePmKey = edgeCS.func(function () {/*
     using System.Threading.Tasks;
@@ -399,15 +390,11 @@ UsbRfid.readInfo = (reqBody, result) => {
 };
 
 UsbRfid.writePmKey = (pdfs, result) => { 
-    edgeVBWritePmKey('VB', function (error, result) {
+    edgeCSWritePmKey(pdfs, function (error, retVal) {
         if (error) throw error;
-        console.log(result); // Returns "NodeJS Welcomes: VB"
+        console.log(retVal);    
+        result(null, { retInt: retVal, ...pdfs });
     });
-    // edgeCSWritePmKey(pdfs, function (error, retVal) {
-    //     if (error) throw error;
-    //     console.log(retVal);    
-    //     result(null, { retInt: retVal, ...pdfs });
-    // });
 };
 
 UsbRfid.decodeKey = (rfidKey, result) => { 

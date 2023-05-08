@@ -1,4 +1,5 @@
 const UsbRfid = require("../utils/usbRfid.js");
+const RFIDEncoder = require("../utils/rfidEncoder.js");
 const Pdfs = require("../models/pdf.model.js");
 const RfidKey = require("../models/rfidKey.model.js");
 
@@ -36,7 +37,7 @@ exports.writeUserPmKey = (req, res) => {
   }
 
   const pdfs = new Pdfs(req.body); 
-  UsbRfid.writePmKey(pdfs, (err, data) => {
+  RFIDEncoder.encodeKey(pdfs, (err, data) => {
     if (err)
       res.status(500).send({
         message:
@@ -44,6 +45,14 @@ exports.writeUserPmKey = (req, res) => {
       });
     else res.send(data);
   });
+  // UsbRfid.writePmKey(pdfs, (err, data) => {
+  //   if (err)
+  //     res.status(500).send({
+  //       message:
+  //         err.message || "Some error occurred while creating the Pdf."
+  //     });
+  //   else res.send(data);
+  // });
 };
 
 exports.decodeKey = (req, res) => {
