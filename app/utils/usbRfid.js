@@ -52,15 +52,6 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
 
     public class Startup
     {
-        [DllImport("kernel32.dll")]
-        static extern IntPtr LoadLibrary(string dllName);
-
-        [DllImport("kernel32.dll")]
-        static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
-
-        [DllImport("function.dll")]
-        public static extern int UL_HLRead(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
-
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
@@ -101,24 +92,6 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
         {   
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
-
-            byte modeR = (byte)0x00;
-            byte blk_addR = Convert.ToByte("04", 16);
-
-            byte[] snrR = new byte[7];
-            byte[] bufferR = new byte[16];
-
-            int nRetR = UL_HLRead(modeR, blk_addR, snrR, bufferR);
-            if (nRetR != 0) {
-                
-            } else {
-                StringBuilder snBuilder = new StringBuilder();
-                for (int i = 0; i < snrR.Length; i++)
-                {
-                    snBuilder.Append(snrR[i].ToString("x2"));
-                }
-                serialNumber = snBuilder.ToString();
-            }
 
             string[] resArr = new string[12];
 
