@@ -14,9 +14,10 @@ const RFIDEncoder = function (obj) {
 };
 
 RFIDEncoder.encodeKey = (pdfs, result) => { 
-    edgeVBEncodeKey('PMS', function (error, result) {
+    edgeVBEncodeKey('PMS', function (error, retVal) {
         if (error) throw error;
-        console.log(result); // Returns "NodeJS Welcomes: PMS"
+        console.log(retVal); 
+        result(null, { retInt: retVal, ...pdfs });
     });
 };
 
