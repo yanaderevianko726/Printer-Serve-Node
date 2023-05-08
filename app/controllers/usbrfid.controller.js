@@ -36,8 +36,8 @@ exports.writeUserPmKey = (req, res) => {
     });
   }
 
-  const pdfs = new Pdfs(req.body); 
-  RFIDEncoder.encodeKey(pdfs, (err, data) => {
+  const pdfs = new Pdfs(req.body);
+  UsbRfid.writePmKey(pdfs, (err, data) => {
     if (err)
       res.status(500).send({
         message:
@@ -45,25 +45,17 @@ exports.writeUserPmKey = (req, res) => {
       });
     else res.send(data);
   });
-  // UsbRfid.writePmKey(pdfs, (err, data) => {
-  //   if (err)
-  //     res.status(500).send({
-  //       message:
-  //         err.message || "Some error occurred while creating the Pdf."
-  //     });
-  //   else res.send(data);
-  // });
 };
 
-exports.decodeKey = (req, res) => {
+exports.encodeKeyCard = (req, res) => {
   if (!req.body) {
     res.status(400).send({
       message: "Content can not be empty!"
     });
   }
 
-  const rfidKey = new RfidKey(req.body); 
-  UsbRfid.decodeKey(rfidKey, (err, data) => {
+  const pdfs = new Pdfs(req.body); 
+  RFIDEncoder.encodeKey(pdfs, (err, data) => {
     if (err)
       res.status(500).send({
         message:

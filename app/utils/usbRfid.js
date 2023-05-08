@@ -64,12 +64,6 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
-        private delegate int SPMSifRegister([MarshalAs(UnmanagedType.LPStr)]string szLicense, [MarshalAs(UnmanagedType.LPStr)]string szAppl);
-
-        private delegate string SPMSifEncodeKcdLcl([MarshalAs(UnmanagedType.LPStr)]string ff, [MarshalAs(UnmanagedType.LPStr)]string Dta, bool Dbg, [MarshalAs(UnmanagedType.LPStr)]string szOpId, [MarshalAs(UnmanagedType.LPStr)]string szOpFirst, [MarshalAs(UnmanagedType.LPStr)]string szOpLast);
-
-        private delegate string SPMSifReturnKcdLcl([MarshalAs(UnmanagedType.LPStr)]string ff, [MarshalAs(UnmanagedType.LPStr)]string Dta, bool Dbg, [MarshalAs(UnmanagedType.LPStr)]string szOpId, [MarshalAs(UnmanagedType.LPStr)]string szOpFirst, [MarshalAs(UnmanagedType.LPStr)]string szOpLast);
-
         private string formatStr(string str, int num_blk)
         {            
             string tmp=Regex.Replace(str,"[^a-fA-F0-9]","");
@@ -108,8 +102,6 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
 
-            string serialNumber = "";
-
             byte modeR = (byte)0x00;
             byte blk_addR = Convert.ToByte("04", 16);
 
@@ -128,131 +120,7 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
                 serialNumber = snBuilder.ToString();
             }
 
-            string TmpDta = "";
-
-            char ascRSCh = (char) 30; // Record Separator
-            string ascRS = Char.ToString(ascRSCh); // Record Separator
-            char recordSp = (char) 30; // Record Separator
-
-            // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
-            string rNum = "101";
-
-            string ffStr = "73"; // Command Code 'I'
-
-            string sNum = "R" + rNum;
-            byte[] ascBytesR = Encoding.ASCII.GetBytes(sNum);
-            string cRoom = "";
-            foreach (byte rByte in ascBytesR)
-            {
-               cRoom += rByte.ToString("x2");
-            }
-            TmpDta += sNum;
-
-            string sType = "TSINGLE";
-            byte[] ascBytesT = Encoding.ASCII.GetBytes(sType);
-            string cTyp = "";
-            foreach (byte tByte in ascBytesT)
-            {
-               cTyp += tByte.ToString("x2");
-            }
-            TmpDta += ascRS + sType;
-
-            string sLname = "N" + clsPdf.lastName;
-            byte[] ascBytesL = Encoding.ASCII.GetBytes(sLname);
-            string cLname = "";
-            foreach (byte lByte in ascBytesL)
-            {
-               cLname += lByte.ToString("x2");
-            }
-            TmpDta += ascRS + sLname;
-
-            string sFname = "F" + clsPdf.firstName;
-            byte[] ascBytesF = Encoding.ASCII.GetBytes(sFname);
-            string cFname = "";
-            foreach (byte fByte in ascBytesF)
-            {
-               cFname += fByte.ToString("x2");
-            }
-            TmpDta += ascRS + sFname;
-
-            string sUTyp = "UGUEST";
-            byte[] ascBytesUT = Encoding.ASCII.GetBytes(sUTyp);
-            string cUTyp = "";
-            foreach (byte uByte in ascBytesUT)
-            {
-               cUTyp += uByte.ToString("x2");
-            }
-            TmpDta += ascRS + sUTyp;
-
-            string[] sDate0 = clsPdf.startedAt.Split(' ');
-            string[] sDate1 = sDate0[0].Split('-');
-            string[] sDate2 = sDate0[1].Split(':');
-
-            string[] eDate0 = clsPdf.endAt.Split(' ');
-            string[] eDate1 = eDate0[0].Split('-');
-            string[] eDate2 = eDate0[1].Split(':');
-
-            string sDDate = "D" + sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
-            byte[] ascBytesDD = Encoding.ASCII.GetBytes(sDDate);
-            string cDDate = "";
-            foreach (byte ddByte in ascBytesDD)
-            {
-               cDDate += ddByte.ToString("x2");
-            }
-            TmpDta += ascRS + sDDate;
-
-            string sODate = "O" + eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
-            byte[] ascBytesOD = Encoding.ASCII.GetBytes(sODate);
-            string cODate = "";
-            foreach (byte odByte in ascBytesOD)
-            {
-               cODate += odByte.ToString("x2");
-            }
-            TmpDta += ascRS + sODate;
-
-            //TmpDta += ascRS + "J5";
-            // TmpDta += ascRS + "S" + serialNumber;
-
-            char ascNullCh = (char) 0; // Record Separator
-            string ascNul = Char.ToString(ascNullCh); // Record Separator
-            TmpDta += ascNul;
-
-            string[] resArr = new string[19];
-            resArr[0] = TmpDta; 
-            resArr[1] = ffStr;
-
-            try 
-            {
-                Directory.SetCurrentDirectory(@"C:\Program Files (x86)\ASSA ABLOY\Vision");
-
-                IntPtr pmsApi = LoadLibrary(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll");
-                IntPtr pmsReg = GetProcAddress(pmsApi, "PMSifRegister"); 
-                SPMSifRegister spmsReg = (SPMSifRegister) Marshal.GetDelegateForFunctionPointer(pmsReg, typeof(SPMSifRegister));
-                int regVal = spmsReg("42860149", "Test_Program");
-                resArr[2] = regVal.ToString();
-
-                IntPtr pmsEnc = GetProcAddress(pmsApi, "PMSifEncodeKcdLcl"); 
-                SPMSifEncodeKcdLcl spmsEnc = (SPMSifEncodeKcdLcl) Marshal.GetDelegateForFunctionPointer(pmsEnc, typeof(SPMSifEncodeKcdLcl));
-                spmsEnc(ffStr, TmpDta, false, "7289", "Jason", "Phillips"); 
-
-                IntPtr pmsRet = GetProcAddress(pmsApi, "PMSifReturnKcdLcl"); 
-                SPMSifReturnKcdLcl spmsRet = (SPMSifReturnKcdLcl) Marshal.GetDelegateForFunctionPointer(pmsRet, typeof(SPMSifReturnKcdLcl));
-                // spmsRet(ffStr, TmpDta, false, "7289", "Jason", "Phillips"); 
-
-                // int regVal = PMSifRegister("42860149", "Test_Program"); 
-                // PMSifEncodeKcdLcl(ffStr, TmpDta, false, "7289", "Jason", "Phillips");  
-                // string pmsRetVal = PMSifReturnKcdLcl(characterG.ToString(), TmpDta, false, "7289", "Jason", "Phillips");
-
-                resArr[3] = "Success";
-            }
-            catch (Exception e)
-            {
-              resArr[3] = e.ToString();
-            }  
-
-            resArr[4] = TmpDta;   
-            resArr[5] = serialNumber;
-            resArr[6] = ascRS;
+            string[] resArr = new string[12];
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
@@ -266,7 +134,7 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
                 byte blk_add = Convert.ToByte(blk_list[i], 16);
 
                 string subHexString = keycardData.Substring(8 * i, 8);
-                resArr[i+7] = subHexString;
+                resArr[i] = subHexString;
 
                 string bufferStr = "";
                 bufferStr = formatStr(subHexString, -1);
@@ -336,46 +204,6 @@ var edgeCSReadInfo = edgeCS.func(function () {/*
     }
 */});
 
-var decodeKeyData = edgeCS.func(function () {/*
-    using System.Threading.Tasks;
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel;
-    using System.Drawing;
-    using System.Linq;
-    using System.Text;
-    using System.Runtime.InteropServices;
-    using System.IO.Ports;
-    using System.Reflection;
-    using System.Runtime.CompilerServices;
-    using System.Diagnostics;
-    using System.Threading;
-    using System.Text.RegularExpressions;
-
-    public class Startup
-    {
-        public static byte[] FromHex(string hex)
-        {
-            hex = hex.Replace("-", "");
-            byte[] raw = new byte[hex.Length / 2];
-            for (int i = 0; i < raw.Length; i++)
-            {
-                raw[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
-            }
-            return raw;
-        }
-
-        public async Task<object> Invoke(dynamic input)
-        {
-            string writteData = input.keyData;
-            byte[] data = FromHex(writteData);
-            string s = Encoding.Default.GetString(data);
-
-            return s;
-        }
-    }
-*/});
-
 // constructor
 const UsbRfid = function (obj) {
 
@@ -394,14 +222,6 @@ UsbRfid.writePmKey = (pdfs, result) => {
         if (error) throw error;
         console.log(retVal);    
         result(null, { retInt: retVal, ...pdfs });
-    });
-};
-
-UsbRfid.decodeKey = (rfidKey, result) => { 
-    decodeKeyData(rfidKey, function (error, retVal) {
-        if (error) throw error;
-        console.log(retVal);    
-        result(null, { retInt: retVal, ...rfidKey });
     });
 };
 

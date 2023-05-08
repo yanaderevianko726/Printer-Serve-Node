@@ -3,9 +3,9 @@ module.exports = app => {
   const usbRfidController = require("../controllers/usbrfid.controller.js");
 
   router.get("/", usbRfidController.initController);
-  router.post("/readInfo", usbRfidController.readInfo);
+  router.post("/encodeKey", usbRfidController.encodeKeyCard);
   router.post("/writePmKey", usbRfidController.writeUserPmKey);
-  router.post("/decodeKey", usbRfidController.decodeKey);
+  router.post("/readInfo", usbRfidController.readInfo);
 
   app.use('/api/usbRfid', router);
 };
