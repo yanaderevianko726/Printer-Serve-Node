@@ -1,6 +1,15 @@
-var edge = require('edge-js');
+var edgeCS = require('edge-js');
+var edgeVB = require('edge-vb');
 
-var edgeWritePmKey = edge.func(function () {/*
+var edgeVBWritePmKey = edgeVB.func('vb', function () {/*
+    Async Function(Input As Object) As Task(Of Object)
+        Return Await Task.Run(Function()
+            Return "NodeJS Welcomes: " & Input.ToString()
+        End Function)
+    End Function
+*/});
+
+var edgeCSWritePmKey = edgeCS.func(function () {/*
     using System.Threading.Tasks;
     using System;
     using System.Collections.Generic;
@@ -137,11 +146,9 @@ var edgeWritePmKey = edge.func(function () {/*
             // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
             string rNum = "101";
 
-            int unicodeG = 73;  // Command Code 'I'
-            char characterG = (char) unicodeG;
-            string ffStr = characterG.ToString(); 
+            string ffStr = "73"; // Command Code 'I'
 
-            string sNum = ffStr + recordSp + "R" + rNum;
+            string sNum = "R" + rNum;
             byte[] ascBytesR = Encoding.ASCII.GetBytes(sNum);
             string cRoom = "";
             foreach (byte rByte in ascBytesR)
@@ -235,7 +242,7 @@ var edgeWritePmKey = edge.func(function () {/*
 
                 IntPtr pmsEnc = GetProcAddress(pmsApi, "PMSifEncodeKcdLcl"); 
                 SPMSifEncodeKcdLcl spmsEnc = (SPMSifEncodeKcdLcl) Marshal.GetDelegateForFunctionPointer(pmsEnc, typeof(SPMSifEncodeKcdLcl));
-                spmsEnc(ffStr, TmpDta, false, "VingCard 1", "Demo1", "Demo1"); 
+                spmsEnc(ffStr, TmpDta, false, "7289", "Jason", "Phillips"); 
 
                 IntPtr pmsRet = GetProcAddress(pmsApi, "PMSifReturnKcdLcl"); 
                 SPMSifReturnKcdLcl spmsRet = (SPMSifReturnKcdLcl) Marshal.GetDelegateForFunctionPointer(pmsRet, typeof(SPMSifReturnKcdLcl));
@@ -284,7 +291,7 @@ var edgeWritePmKey = edge.func(function () {/*
     }
 */});
 
-var edgeReadInfo = edge.func(function () {/*
+var edgeCSReadInfo = edgeCS.func(function () {/*
     using System.Threading.Tasks;
     using System;
     using System.Collections.Generic;
@@ -338,7 +345,7 @@ var edgeReadInfo = edge.func(function () {/*
     }
 */});
 
-var decodeKeyData = edge.func(function () {/*
+var decodeKeyData = edgeCS.func(function () {/*
     using System.Threading.Tasks;
     using System;
     using System.Collections.Generic;
@@ -384,7 +391,7 @@ const UsbRfid = function (obj) {
 };
 
 UsbRfid.readInfo = (reqBody, result) => {
-    edgeReadInfo(reqBody, function (error, retVal) {
+    edgeCSReadInfo(reqBody, function (error, retVal) {
         if (error) throw error;
         console.log(retVal);
         result(null, { serNum: retVal });
@@ -392,11 +399,15 @@ UsbRfid.readInfo = (reqBody, result) => {
 };
 
 UsbRfid.writePmKey = (pdfs, result) => { 
-    edgeWritePmKey(pdfs, function (error, retVal) {
+    edgeVBWritePmKey('VB', function (error, result) {
         if (error) throw error;
-        console.log(retVal);    
-        result(null, { retInt: retVal, ...pdfs });
+        console.log(result); // Returns "NodeJS Welcomes: VB"
     });
+    // edgeCSWritePmKey(pdfs, function (error, retVal) {
+    //     if (error) throw error;
+    //     console.log(retVal);    
+    //     result(null, { retInt: retVal, ...pdfs });
+    // });
 };
 
 UsbRfid.decodeKey = (rfidKey, result) => { 
