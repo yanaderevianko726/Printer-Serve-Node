@@ -1,10 +1,4 @@
 var edge = require('edge-js');
-var ffi = require('ffi-napi');
-
-var pmsdll = ffi.Library('pmsif.dll', {
-  'PMSifRegisterKcdLcl': [ 'int', [ 'string', 'string' ] ],
-  'PMSifReturnKcdLcl': [ 'string', [ 'string', 'string', 'bool', 'string', 'string', 'string' ] ]
-}); 
 
 var edgeWritePmKey = edge.func(function () {/*
     using System.Threading.Tasks;
@@ -398,14 +392,11 @@ UsbRfid.readInfo = (reqBody, result) => {
 };
 
 UsbRfid.writePmKey = (pdfs, result) => { 
-
-    var retVal = pmsdll.PMSifRegisterKcdLcl("7289", "Jason");
-    result(null, { retInt: retVal, ...pdfs });
-    // edgeWritePmKey(pdfs, function (error, retVal) {
-    //     if (error) throw error;
-    //     console.log(retVal);    
-    //     result(null, { retInt: retVal, ...pdfs });
-    // });
+    edgeWritePmKey(pdfs, function (error, retVal) {
+        if (error) throw error;
+        console.log(retVal);    
+        result(null, { retInt: retVal, ...pdfs });
+    });
 };
 
 UsbRfid.decodeKey = (rfidKey, result) => { 
