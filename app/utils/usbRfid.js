@@ -1,4 +1,10 @@
 var edge = require('edge-js');
+var ffi = require('ffi-napi');
+
+var pmsdll = ffi.Library('pmsif.dll', {
+  'PMSifRegisterKcdLcl': [ 'int', [ 'string', 'string' ] ],
+  'PMSifReturnKcdLcl': [ 'string', [ 'string', 'string', 'bool', 'string', 'string', 'string' ] ]
+}); 
 
 var edgeWritePmKey = edge.func(function () {/*
     using System.Threading.Tasks;
@@ -52,20 +58,23 @@ var edgeWritePmKey = edge.func(function () {/*
 
     public class Startup
     {
+        [DllImport("kernel32.dll")]
+        static extern IntPtr LoadLibrary(string dllName);
+
+        [DllImport("kernel32.dll")]
+        static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+
         [DllImport("function.dll")]
         public static extern int UL_HLRead(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
-        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern int PMSifRegister(string szLicense, string szAppl);
+        private delegate int SPMSifRegister([MarshalAs(UnmanagedType.LPStr)]string szLicense, [MarshalAs(UnmanagedType.LPStr)]string szAppl);
 
-        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern string PMSifReturnKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+        private delegate string SPMSifEncodeKcdLcl([MarshalAs(UnmanagedType.LPStr)]string ff, [MarshalAs(UnmanagedType.LPStr)]string Dta, bool Dbg, [MarshalAs(UnmanagedType.LPStr)]string szOpId, [MarshalAs(UnmanagedType.LPStr)]string szOpFirst, [MarshalAs(UnmanagedType.LPStr)]string szOpLast);
 
-        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern void PMSifEncodeKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+        private delegate string SPMSifReturnKcdLcl([MarshalAs(UnmanagedType.LPStr)]string ff, [MarshalAs(UnmanagedType.LPStr)]string Dta, bool Dbg, [MarshalAs(UnmanagedType.LPStr)]string szOpId, [MarshalAs(UnmanagedType.LPStr)]string szOpFirst, [MarshalAs(UnmanagedType.LPStr)]string szOpLast);
 
         private string formatStr(string str, int num_blk)
         {            
@@ -127,38 +136,34 @@ var edgeWritePmKey = edge.func(function () {/*
 
             string TmpDta = "";
 
-            char ascRS = (char) 30; // Record Separator
+            char ascRSCh = (char) 30; // Record Separator
+            string ascRS = Char.ToString(ascRSCh); // Record Separator
             char recordSp = (char) 30; // Record Separator
 
             // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
             string rNum = "101";
 
-            string sNum = "R" + rNum;
+            int unicodeG = 73;  // Command Code 'I'
+            char characterG = (char) unicodeG;
+            string ffStr = characterG.ToString(); 
+
+            string sNum = ffStr + recordSp + "R" + rNum;
             byte[] ascBytesR = Encoding.ASCII.GetBytes(sNum);
             string cRoom = "";
             foreach (byte rByte in ascBytesR)
             {
                cRoom += rByte.ToString("x2");
             }
-            TmpDta += cRoom;
+            TmpDta += sNum;
 
-            string sType = "TSingle Room";
+            string sType = "TSINGLE";
             byte[] ascBytesT = Encoding.ASCII.GetBytes(sType);
             string cTyp = "";
             foreach (byte tByte in ascBytesT)
             {
                cTyp += tByte.ToString("x2");
             }
-            TmpDta += ascRS + cTyp;
-
-            string sFname = "F" + clsPdf.firstName;
-            byte[] ascBytesF = Encoding.ASCII.GetBytes(sFname);
-            string cFname = "";
-            foreach (byte fByte in ascBytesF)
-            {
-               cFname += fByte.ToString("x2");
-            }
-            TmpDta += ascRS + cFname;
+            TmpDta += ascRS + sType;
 
             string sLname = "N" + clsPdf.lastName;
             byte[] ascBytesL = Encoding.ASCII.GetBytes(sLname);
@@ -167,16 +172,25 @@ var edgeWritePmKey = edge.func(function () {/*
             {
                cLname += lByte.ToString("x2");
             }
-            TmpDta += ascRS + cLname;
+            TmpDta += ascRS + sLname;
 
-            string sUTyp = "URegular Guest";
+            string sFname = "F" + clsPdf.firstName;
+            byte[] ascBytesF = Encoding.ASCII.GetBytes(sFname);
+            string cFname = "";
+            foreach (byte fByte in ascBytesF)
+            {
+               cFname += fByte.ToString("x2");
+            }
+            TmpDta += ascRS + sFname;
+
+            string sUTyp = "UGUEST";
             byte[] ascBytesUT = Encoding.ASCII.GetBytes(sUTyp);
             string cUTyp = "";
             foreach (byte uByte in ascBytesUT)
             {
                cUTyp += uByte.ToString("x2");
             }
-            TmpDta += ascRS + cUTyp;
+            TmpDta += ascRS + sUTyp;
 
             string[] sDate0 = clsPdf.startedAt.Split(' ');
             string[] sDate1 = sDate0[0].Split('-');
@@ -193,7 +207,7 @@ var edgeWritePmKey = edge.func(function () {/*
             {
                cDDate += ddByte.ToString("x2");
             }
-            TmpDta += ascRS + cDDate;
+            TmpDta += ascRS + sDDate;
 
             string sODate = "O" + eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
             byte[] ascBytesOD = Encoding.ASCII.GetBytes(sODate);
@@ -202,32 +216,51 @@ var edgeWritePmKey = edge.func(function () {/*
             {
                cODate += odByte.ToString("x2");
             }
-            TmpDta += ascRS + cODate;
+            TmpDta += ascRS + sODate;
 
             //TmpDta += ascRS + "J5";
             // TmpDta += ascRS + "S" + serialNumber;
-            //TmpDta += null;
+
+            char ascNullCh = (char) 0; // Record Separator
+            string ascNul = Char.ToString(ascNullCh); // Record Separator
+            TmpDta += ascNul;
 
             string[] resArr = new string[19];
             resArr[0] = TmpDta; 
+            resArr[1] = ffStr;
 
-            Directory.SetCurrentDirectory(@"C:\Program Files (x86)\ASSA ABLOY\Vision");
+            try 
+            {
+                Directory.SetCurrentDirectory(@"C:\Program Files (x86)\ASSA ABLOY\Vision");
 
-            int regVal = PMSifRegister("42860149", "Test_Program");
-            resArr[1] = regVal.ToString(); 
+                IntPtr pmsApi = LoadLibrary(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll");
+                IntPtr pmsReg = GetProcAddress(pmsApi, "PMSifRegister"); 
+                SPMSifRegister spmsReg = (SPMSifRegister) Marshal.GetDelegateForFunctionPointer(pmsReg, typeof(SPMSifRegister));
+                int regVal = spmsReg("42860149", "Test_Program");
+                resArr[2] = regVal.ToString();
 
-            int unicodeG = 71;  // Command Code 'G'
-            char characterG = (char) unicodeG;
-            string ffStr = characterG.ToString(); 
-            resArr[2] = ffStr;
+                IntPtr pmsEnc = GetProcAddress(pmsApi, "PMSifEncodeKcdLcl"); 
+                SPMSifEncodeKcdLcl spmsEnc = (SPMSifEncodeKcdLcl) Marshal.GetDelegateForFunctionPointer(pmsEnc, typeof(SPMSifEncodeKcdLcl));
+                spmsEnc(ffStr, TmpDta, false, "VingCard 1", "Demo1", "Demo1"); 
 
-            PMSifEncodeKcdLcl(ffStr, TmpDta, false, "7289", "Jason", "Phillips");  
-            //string pmsRetVal = PMSifReturnKcdLcl(characterG.ToString(), TmpDta, false, "7289", "Phillips", "Jason");  
+                IntPtr pmsRet = GetProcAddress(pmsApi, "PMSifReturnKcdLcl"); 
+                SPMSifReturnKcdLcl spmsRet = (SPMSifReturnKcdLcl) Marshal.GetDelegateForFunctionPointer(pmsRet, typeof(SPMSifReturnKcdLcl));
+                // spmsRet(ffStr, TmpDta, false, "7289", "Jason", "Phillips"); 
 
-            resArr[3] = ffStr;   
+                // int regVal = PMSifRegister("42860149", "Test_Program"); 
+                // PMSifEncodeKcdLcl(ffStr, TmpDta, false, "7289", "Jason", "Phillips");  
+                // string pmsRetVal = PMSifReturnKcdLcl(characterG.ToString(), TmpDta, false, "7289", "Jason", "Phillips");
+
+                resArr[3] = "Success";
+            }
+            catch (Exception e)
+            {
+              resArr[3] = e.ToString();
+            }  
+
             resArr[4] = TmpDta;   
             resArr[5] = serialNumber;
-            resArr[6] = Directory.GetCurrentDirectory();
+            resArr[6] = ascRS;
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
@@ -365,11 +398,14 @@ UsbRfid.readInfo = (reqBody, result) => {
 };
 
 UsbRfid.writePmKey = (pdfs, result) => { 
-    edgeWritePmKey(pdfs, function (error, retVal) {
-        if (error) throw error;
-        console.log(retVal);    
-        result(null, { retInt: retVal, ...pdfs });
-    });
+
+    var retVal = pmsdll.PMSifRegisterKcdLcl("7289", "Jason");
+    result(null, { retInt: retVal, ...pdfs });
+    // edgeWritePmKey(pdfs, function (error, retVal) {
+    //     if (error) throw error;
+    //     console.log(retVal);    
+    //     result(null, { retInt: retVal, ...pdfs });
+    // });
 };
 
 UsbRfid.decodeKey = (rfidKey, result) => { 
