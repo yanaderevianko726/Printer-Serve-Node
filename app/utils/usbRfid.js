@@ -55,6 +55,18 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
         [DllImport("function.dll")]
         public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
+        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
+        public static extern int PMSifRegister(string szLicense, string szAppl);
+
+        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
+        public static extern int PMSifUnregister();
+
+        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
+        public static extern string PMSifReturnKcdLcd(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+
+        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
+        public static extern void PMSifEncodeKcdLcd(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+
         private string formatStr(string str, int num_blk)
         {            
             string tmp=Regex.Replace(str,"[^a-fA-F0-9]","");
@@ -93,7 +105,44 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
 
-            string[] resArr = new string[12];
+            string TmpDta = "";
+
+            int unicode = 30;  // Record Separator
+            char character = (char) unicode;
+            string recordSp = character.ToString();
+
+            // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
+            string rNum = "101";
+            TmpDta = "R" + rNum;
+
+            TmpDta += recordSp + "TSINGLE";
+            TmpDta += recordSp + "F" + clsPdf.firstName;
+            TmpDta += recordSp + "N" + clsPdf.lastName;
+            TmpDta += recordSp + "UGUEST";
+
+            string[] sDate0 = clsPdf.startedAt.Split(' ');
+            string[] sDate1 = sDate0[0].Split('-');
+            string[] sDate2 = sDate0[1].Split(':');
+
+            string[] eDate0 = clsPdf.endAt.Split(' ');
+            string[] eDate1 = eDate0[0].Split('-');
+            string[] eDate2 = eDate0[1].Split(':');
+
+            string dDate = sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
+            TmpDta += recordSp + "D" + dDate;
+
+            string oDate = eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
+            TmpDta += recordSp + "D" + oDate;
+
+            TmpDta += recordSp + "J5";
+
+            string[] resArr = new string[14];
+            resArr[0] = TmpDta; 
+
+            Directory.SetCurrentDirectory(@"C:\Program Files (x86)\ASSA ABLOY\Vision");
+
+            int retVal = PMSifRegister("42860149", "Test_Program");
+            resArr[1] = retVal.ToString(); 
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
@@ -107,7 +156,7 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
                 byte blk_add = Convert.ToByte(blk_list[i], 16);
 
                 string subHexString = keycardData.Substring(8 * i, 8);
-                resArr[i] = subHexString;
+                resArr[i+2] = subHexString;
 
                 string bufferStr = "";
                 bufferStr = formatStr(subHexString, -1);
