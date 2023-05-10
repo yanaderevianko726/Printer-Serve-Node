@@ -62,10 +62,10 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
         public static extern int PMSifUnregister();
 
         [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern string PMSifReturnKcdLcd(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+        public static extern string PMSifReturnKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
         [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern void PMSifEncodeKcdLcd(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+        public static extern void PMSifEncodeKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
         private string formatStr(string str, int num_blk)
         {            
@@ -107,9 +107,9 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
 
             string TmpDta = "";
 
-            int unicode = 30;  // Record Separator
-            char character = (char) unicode;
-            string recordSp = character.ToString();
+            int unicodeRS = 30;  // Record Separator
+            char characterRS = (char) unicodeRS;
+            string recordSp = characterRS.ToString();
 
             // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
             string rNum = "101";
@@ -136,13 +136,22 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
 
             TmpDta += recordSp + "J5";
 
-            string[] resArr = new string[14];
+            string[] resArr = new string[15];
             resArr[0] = TmpDta; 
 
-            Directory.SetCurrentDirectory(@"C:\Program Files (x86)\ASSA ABLOY\Vision");
+            Directory.SetCurrentDirectory(@"C:\Program Files (x86)\ASSA ABLOY\Vision\");
 
             int retVal = PMSifRegister("42860149", "Test_Program");
             resArr[1] = retVal.ToString(); 
+
+            int unicodeI = 73;  // Command I string
+            char characterI = (char) unicodeI;
+            string ffStr = characterI.ToString();
+
+            PMSifEncodeKcdLcl(ffStr, TmpDta, false, "7289", "Jason", "Phillips");
+
+            string rtnVal = PMSifReturnKcdLcl(ffStr, TmpDta, false, "7289", "Jason", "Phillips");
+            resArr[2] = rtnVal;
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
@@ -156,7 +165,7 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
                 byte blk_add = Convert.ToByte(blk_list[i], 16);
 
                 string subHexString = keycardData.Substring(8 * i, 8);
-                resArr[i+2] = subHexString;
+                resArr[i+3] = subHexString;
 
                 string bufferStr = "";
                 bufferStr = formatStr(subHexString, -1);

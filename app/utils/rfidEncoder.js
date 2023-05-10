@@ -1,12 +1,9 @@
 var edge = require('edge');
 
 var edgeVBEncodeKey = edge.func('vb', function () {/*
-    Imports System.Runtime.InteropServices
     Async Function(Input As Object) As Task(Of Object)
         Return Await Task.Run(Function()
-            Dim dllPath As String
-            dllPath = "C:\Program Files (x86)\ASSA ABLOY\Vision\"
-            Return "Downer Welcomes: " & Input.firstName & " " & & dllPath
+            Return "Downer Welcomes: " & Input.firstName
         End Function)
     End Function              
 */});
