@@ -144,11 +144,9 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
             int retVal = PMSifRegister("42860149", "Test_Program");
             resArr[1] = retVal.ToString(); 
 
-            int unicodeI = 73;  // Command I string
+            int unicodeI = 69;  // Command E string
             char characterI = (char) unicodeI;
             string ffStr = characterI.ToString();
-
-            PMSifEncodeKcdLcl(ffStr, TmpDta, false, "7289", "Jason", "Phillips");
 
             string rtnVal = PMSifReturnKcdLcl(ffStr, TmpDta, false, "7289", "Jason", "Phillips");
             resArr[2] = rtnVal;
