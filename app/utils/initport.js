@@ -1,4 +1,5 @@
 var edge = require('edge-js');
+
 var edgeInitPort = edge.func(function () {/*
     using System.Threading.Tasks;
     using System;

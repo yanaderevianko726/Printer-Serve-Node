@@ -62,7 +62,7 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
         public static extern int PMSifUnregister();
 
         [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern string PMSifReturnKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+        public static extern IntPtr PMSifReturnKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
 
         [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
         public static extern void PMSifEncodeKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
@@ -86,16 +86,13 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
             }
         }
 
-        private string showData(byte[] data, int s, int e)
+        private string convertStrToAscii(string dataStr)
         {
-            string txt = "";
-            for (int i = 0; i < e; i++) {
-                if (data[s + i] < 0)
-                    data[s + i] = Convert.ToByte(Convert.ToInt32(data[s + i]) + 256);
-            }
-
-            for (int i = 0; i < e; i++) {
-                txt += data[s + i].ToString("X2")+" ";
+            byte[] strBytes = Encoding.ASCII.GetBytes(dataStr);
+            string txt = String.Empty;
+            foreach (byte by in strBytes)
+            {
+                 txt += by.ToString("X2") + " ";
             }
             return txt;
         }
@@ -106,35 +103,53 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
             clsPdf.initWithDynamic(input);
 
             string TmpDta = "";
-
-            int unicodeRS = 30;  // Record Separator
-            char characterRS = (char) unicodeRS;
-            string recordSp = characterRS.ToString();
+            string ffCmd = "54";  // ascii 69, character E
+            string ffRS = "1E ";  // ascii 30, record separater
+            string ffR = "52 ";  // ascii 82, character R
+            string ffT = "54 ";  // ascii 84, character T
+            string ffF = "46 ";  // ascii 70, character F
+            string ffN = "4E ";  // ascii 78, character N
+            string ffU = "55 ";  // ascii 85, character U
+            string ffD = "44 ";  // ascii 68, character D
+            string ffO = "4F ";  // ascii 79, character O
+            string ffJ = "4A ";  // ascii 74, character J
+            string ff1 = "35 ";  // ascii 53, character 5
+            string ffS = "53 ";  // ascii 83, character S
+            string ffNull = "00";  // Null, 0x00
 
             // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
-            string rNum = "101";
-            TmpDta = "R" + rNum;
+            string rNum = convertStrToAscii("101");
+            TmpDta = ffR + rNum;
 
-            TmpDta += recordSp + "TSINGLE";
-            TmpDta += recordSp + "F" + clsPdf.firstName;
-            TmpDta += recordSp + "N" + clsPdf.lastName;
-            TmpDta += recordSp + "UGUEST";
+            string rRoomTyp = convertStrToAscii("SINGLE");
+            TmpDta += ffRS + ffT + rRoomTyp;
 
-            string[] sDate0 = clsPdf.startedAt.Split(' ');
-            string[] sDate1 = sDate0[0].Split('-');
-            string[] sDate2 = sDate0[1].Split(':');
+            string rLname = convertStrToAscii(clsPdf.lastName);
+            TmpDta += ffRS + ffN + rLname;
+
+            string rFname = convertStrToAscii(clsPdf.firstName);
+            TmpDta += ffRS + ffF + rFname;
+
+            string rUtype = convertStrToAscii("GUEST");
+            TmpDta += ffRS + ffU + rUtype;
 
             string[] eDate0 = clsPdf.endAt.Split(' ');
             string[] eDate1 = eDate0[0].Split('-');
             string[] eDate2 = eDate0[1].Split(':');
 
-            string dDate = sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
-            TmpDta += recordSp + "D" + dDate;
-
             string oDate = eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
-            TmpDta += recordSp + "D" + oDate;
+            TmpDta += ffRS + ffO + convertStrToAscii(oDate);
 
-            TmpDta += recordSp + "J5";
+            string[] sDate0 = clsPdf.startedAt.Split(' ');
+            string[] sDate1 = sDate0[0].Split('-');
+            string[] sDate2 = sDate0[1].Split(':');
+
+            string dDate = sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
+            TmpDta += ffRS + ffD + convertStrToAscii(dDate);
+
+            TmpDta += ffRS + ffJ + ff1;
+
+            TmpDta += ffNull;
 
             string[] resArr = new string[15];
             resArr[0] = TmpDta; 
@@ -144,12 +159,24 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
             int retVal = PMSifRegister("42860149", "Test_Program");
             resArr[1] = retVal.ToString(); 
 
-            int unicodeI = 69;  // Command E string
-            char characterI = (char) unicodeI;
-            string ffStr = characterI.ToString();
+            resArr[2] = "";
+            try 
+            {
+                IntPtr resPtr = PMSifReturnKcdLcl(ffCmd, TmpDta, false, "7289", "Jason", "Phillips");
+                byte[] byteArr = new byte[512];
+                Marshal.Copy(resPtr, byteArr, 0, 512);
 
-            string rtnVal = PMSifReturnKcdLcl(ffStr, TmpDta, false, "7289", "Jason", "Phillips");
-            resArr[2] = rtnVal;
+                string txt = "";
+                for (int i = 0; i < 512; i++) {
+                    txt += byteArr[i].ToString() + " ";
+                }
+
+                resArr[2] = txt;
+            }
+            catch (Exception e)
+            {
+                resArr[2] = e.Message;
+            }
 
             byte mode = 0x00;
             byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
@@ -174,7 +201,7 @@ var edgeCSWritePmKey = edgeCS.func(function () {/*
                 // int nRet = UL_HLWrite(mode, blk_add, snr, buffer);
             }
 
-            return resArr;
+            return resArr;  
         }
     }
 */});
