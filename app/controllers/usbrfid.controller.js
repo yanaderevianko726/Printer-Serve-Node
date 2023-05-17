@@ -1,7 +1,7 @@
 const UsbRfid = require("../utils/usbRfid.js");
 const RFIDEncoder = require("../utils/rfidEncoder.js");
+const RfidData = require("../models/rfid.data.model.js");
 const Pdfs = require("../models/pdf.model.js");
-const RfidKey = require("../models/rfidKey.model.js");
 
 exports.initController = (req, res) => {
   if (!req.body) {
@@ -12,14 +12,15 @@ exports.initController = (req, res) => {
   res.send("Welcome to rfid reader module.");
 };
 
-exports.readInfo = (req, res) => {
+exports.writeRfidData = (req, res) => {
   if (!req.body) {
     res.status(400).send({
       message: "Content can not be empty!"
     });
   }
 
-  UsbRfid.readInfo(req.body, (err, data) => {
+  const rfidData = new RfidData(req.body);
+  UsbRfid.writeInfo(rfidData, (err, data) => {
     if (err)
       res.status(500).send({
         message:
@@ -29,15 +30,14 @@ exports.readInfo = (req, res) => {
   });
 };
 
-exports.writeUserPmKey = (req, res) => {
+exports.readRfidData = (req, res) => {
   if (!req.body) {
     res.status(400).send({
       message: "Content can not be empty!"
     });
   }
 
-  const pdfs = new Pdfs(req.body);
-  UsbRfid.writePmKey(pdfs, (err, data) => {
+  UsbRfid.readInfo((err, data) => {
     if (err)
       res.status(500).send({
         message:
@@ -54,7 +54,7 @@ exports.encodeKeyCard = (req, res) => {
     });
   }
 
-  const pdfs = new Pdfs(req.body); 
+  const pdfs = new Pdfs(req.body);
   RFIDEncoder.encodeKey(pdfs, (err, data) => {
     if (err)
       res.status(500).send({
