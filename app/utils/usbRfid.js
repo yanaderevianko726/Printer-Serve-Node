@@ -45,7 +45,8 @@ var edgeCSWriteInfo = edgeCS.func(function () {/*
 
         public async Task<object> Invoke(dynamic input)
         {   
-            string pmKey = input.pmKey;
+            // string pmKey = input.pmKey;
+            string pmKey = "FCFF0F000000FCFF0F000000FCFF0FF10000FCFF0F000000FCFF0F000000FCEF0F000000FCFF0F0000C0FFFFFF030016";
 
             string[] resArr = new string[13];
             resArr[0] = pmKey; 
