@@ -77,7 +77,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             string txt = String.Empty;
             foreach (byte by in strBytes)
             {
-                 txt += by.ToString("X2") + " ";
+                 txt += by.ToString("X2");
             }
             return txt;
         }
@@ -87,55 +87,77 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
 
+            int asciiInt = 2;
+            char charOfAscii = (char) asciiInt;
+            string strOfChar = charOfAscii.ToString();
+
+            string ffSTX = strOfChar;  // ascii 2, start of text
+
+            asciiInt = 3;
+            charOfAscii = (char) asciiInt;
+            strOfChar = charOfAscii.ToString();
+
+            string ffETX = strOfChar;  // ascii 3, end of text
+
+            asciiInt = 30;
+            charOfAscii = (char) asciiInt;
+            strOfChar = charOfAscii.ToString();
+
+            string ffRS = strOfChar;  // ascii 30, record separater
+
+            asciiInt = 00;
+            charOfAscii = (char) asciiInt;
+            strOfChar = charOfAscii.ToString();
+
+            string ffNull = strOfChar;  // Null, 0x00
+
+            string ffCmd = "G";  // ascii 71, character G, 47
+            string ffR = "R";  // ascii 82, character R, 52
+            string ffT = "T";  // ascii 84, character T, 54
+            string ffF = "F";  // ascii 70, character F, 46
+            string ffN = "N";  // ascii 78, character N, 4E
+            string ffU = "U";  // ascii 85, character U, 55
+            string ffD = "D";  // ascii 68, character D, 44
+            string ffO = "O";  // ascii 79, character O, 4F
+            string ffJ5 = "J5";  // ascii 74, character J, 4A
+            string ffS = "S";  // ascii 83, character S, 53
+
             string TmpDta = "";
-            string ffCmd = "54";  // ascii 69, character E
-            string ffRS = "1E ";  // ascii 30, record separater
-            string ffR = "52 ";  // ascii 82, character R
-            string ffT = "54 ";  // ascii 84, character T
-            string ffF = "46 ";  // ascii 70, character F
-            string ffN = "4E ";  // ascii 78, character N
-            string ffU = "55 ";  // ascii 85, character U
-            string ffD = "44 ";  // ascii 68, character D
-            string ffO = "4F ";  // ascii 79, character O
-            string ffJ = "4A ";  // ascii 74, character J
-            string ff1 = "35 ";  // ascii 53, character 5
-            string ffS = "53 ";  // ascii 83, character S
-            string ffNull = "00";  // Null, 0x00
 
             // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
             string rNum = convertStrToAscii("101");
-            TmpDta = ffR + rNum;
+            TmpDta += ffR + "102";
 
-            string rRoomTyp = convertStrToAscii("SINGLE");
-            TmpDta += ffRS + ffT + rRoomTyp;
-
-            string rLname = convertStrToAscii(clsPdf.lastName);
-            TmpDta += ffRS + ffN + rLname;
+            string rRoomTyp = convertStrToAscii("Single Room");
+            TmpDta += ffRS + ffT + "Single Room";
 
             string rFname = convertStrToAscii(clsPdf.firstName);
-            TmpDta += ffRS + ffF + rFname;
+            TmpDta += ffRS + ffF + clsPdf.firstName;
 
-            string rUtype = convertStrToAscii("GUEST");
-            TmpDta += ffRS + ffU + rUtype;
+            string rLname = convertStrToAscii(clsPdf.lastName);
+            TmpDta += ffRS + ffN + clsPdf.lastName;
 
-            string[] eDate0 = clsPdf.endAt.Split(' ');
-            string[] eDate1 = eDate0[0].Split('-');
-            string[] eDate2 = eDate0[1].Split(':');
-
-            string oDate = eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
-            TmpDta += ffRS + ffO + convertStrToAscii(oDate);
+            string rUtype = convertStrToAscii("Regular Guest");
+            TmpDta += ffRS + ffU + "Regular Guest";
 
             string[] sDate0 = clsPdf.startedAt.Split(' ');
             string[] sDate1 = sDate0[0].Split('-');
             string[] sDate2 = sDate0[1].Split(':');
 
             string dDate = sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
-            TmpDta += ffRS + ffD + convertStrToAscii(dDate);
+            TmpDta += ffRS + ffD + dDate;
 
-            TmpDta += ffRS + ffJ + ff1;
+            string[] eDate0 = clsPdf.endAt.Split(' ');
+            string[] eDate1 = eDate0[0].Split('-');
+            string[] eDate2 = eDate0[1].Split(':');
+
+            string oDate = eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
+            TmpDta += ffRS + ffO + oDate;
+
+            TmpDta += ffRS + ffJ5;
             TmpDta += ffNull;
 
-            string[] resArr = new string[3];
+            string[] resArr = new string[5];
             resArr[0] = TmpDta; 
 
             Directory.SetCurrentDirectory(@"C:\Program Files (x86)\ASSA ABLOY\Vision\");
@@ -144,22 +166,30 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             resArr[1] = retVal.ToString(); 
 
             resArr[2] = "";
+            resArr[3] = "";
+            resArr[4] = "";
             try 
             {
                 IntPtr resPtr = PMSifReturnKcdLcl(ffCmd, TmpDta, false, "7289", "Jason", "Phillips");
                 byte[] byteArr = new byte[512];
                 Marshal.Copy(resPtr, byteArr, 0, 512);
 
+                // string strOfBytes = Encoding.UTF8.GetString(byteArr);
+                // resArr[2] = strOfBytes;
+
                 string txt = "";
                 for (int i = 0; i < 512; i++) {
                     txt += byteArr[i].ToString() + " ";
+                    //int uCode = int.Parse(byteArr[i].ToString());
+                    //char charOfUC = (char) uCode;
+                    //txt += charOfUC.ToString();
                 }
 
-                resArr[2] = txt;
+                resArr[3] = txt;
             }
             catch (Exception e)
             {
-                resArr[2] = e.Message;
+                resArr[4] = e.Message;
             }
 
             return resArr;  
