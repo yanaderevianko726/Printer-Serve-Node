@@ -1,5 +1,47 @@
 var edgeCS = require('edge-js');
 
+var edgeCSRegisterPMS = edgeCS.func(function () {/*
+    using System.Threading.Tasks;
+    using System;
+    using System.Collections.Generic;
+    using System.ComponentModel;
+    using System.Drawing;
+    using System.Linq;
+    using System.Text;
+    using System.Runtime.InteropServices;
+    using System.IO;
+    using System.IO.Ports;
+    using System.Reflection;
+    using System.Runtime.CompilerServices;
+    using System.Diagnostics;
+    using System.Threading;
+    using System.Text.RegularExpressions;
+    using System.Runtime.Serialization.Formatters.Binary;
+    using System.Runtime.Serialization;
+
+    public class Startup
+    {
+        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
+        public static extern int PMSifRegister(string szLicense, string szAppl);
+
+        public async Task<object> Invoke(dynamic input)
+        {
+            string[] resArr = new string[1];
+            try 
+            {
+                int regVal = PMSifRegister("42860149", "Test_Program");
+                resArr[0] = regVal.ToString();
+            }
+            catch (Exception e)
+            {
+                resArr[4] = e.Message;
+            }
+
+            return resArr;  
+        }
+    }
+*/});
+
 var edgeCSEncodeInfo = edgeCS.func(function () {/*
     using System.Threading.Tasks;
     using System;
@@ -53,16 +95,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
     public class Startup
     {
         [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern int PMSifRegister(string szLicense, string szAppl);
-
-        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern int PMSifUnregister();
-
-        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern IntPtr PMSifReturnKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
-
-        [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern void PMSifEncodeKcdLcl(string ff, string Dta, bool Dbg, string szOpId, string szOpFirst, string szOpLast);
+        public static extern int PMSifReturnKcdLcl(StringBuilder ff, StringBuilder Dta, bool Dbg, StringBuilder szOpId, StringBuilder szOpFirst, StringBuilder szOpLast);
 
         private void convertStr(byte[] after, string before, int length)
         {
@@ -103,7 +136,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             charOfAscii = (char) asciiInt;
             strOfChar = charOfAscii.ToString();
 
-            string ffRS = strOfChar;  // ascii 30, record separater
+            string ffRS = "";  // ascii 30, record separater
 
             asciiInt = 00;
             charOfAscii = (char) asciiInt;
@@ -126,7 +159,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
 
             // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
             string rNum = convertStrToAscii("101");
-            TmpDta += ffR + "102";
+            TmpDta += "G" + ffRS + ffR + clsPdf.roomNum;
 
             string rRoomTyp = convertStrToAscii("Single Room");
             TmpDta += ffRS + ffT + "Single Room";
@@ -154,42 +187,59 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             string oDate = eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
             TmpDta += ffRS + ffO + oDate;
 
-            TmpDta += ffRS + ffJ5;
-            TmpDta += ffNull;
+            //TmpDta += ffRS + ffJ5;
+            //TmpDta += ffNull;
 
-            string[] resArr = new string[5];
+            string[] resArr = new string[4];
             resArr[0] = TmpDta; 
 
-            Directory.SetCurrentDirectory(@"C:\Program Files (x86)\ASSA ABLOY\Vision\");
+            //Directory.SetCurrentDirectory(@"C:\Program Files (x86)\ASSA ABLOY\Vision\");
+            
+            //IntPtr pmsApi = LoadLibrary(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll");
 
-            int retVal = PMSifRegister("42860149", "Test_Program");
-            resArr[1] = retVal.ToString(); 
+            //IntPtr pmsRet = GetProcAddress(pmsApi, "PMSifReturnKcdLcl"); 
+            //SPMSifReturnKcdLcl spmsRet = (SPMSifReturnKcdLcl) Marshal.GetDelegateForFunctionPointer(pmsRet, typeof(SPMSifReturnKcdLcl));
 
+            resArr[1] = "";
             resArr[2] = "";
             resArr[3] = "";
-            resArr[4] = "";
+
             try 
             {
-                IntPtr resPtr = PMSifReturnKcdLcl(ffCmd, TmpDta, false, "7289", "Jason", "Phillips");
-                byte[] byteArr = new byte[512];
-                Marshal.Copy(resPtr, byteArr, 0, 512);
+                // IntPtr returnPtr = PMSifReturnKcdLcl(ffCmd, TmpDta, false, "7289", "Jason", "Phillips");
 
-                // string strOfBytes = Encoding.UTF8.GetString(byteArr);
-                // resArr[2] = strOfBytes;
+                string sCmd = "G";
+                StringBuilder sbCmd = new StringBuilder(sCmd, sCmd.Length);
 
-                string txt = "";
-                for (int i = 0; i < 512; i++) {
-                    txt += byteArr[i].ToString() + " ";
-                    //int uCode = int.Parse(byteArr[i].ToString());
-                    //char charOfUC = (char) uCode;
-                    //txt += charOfUC.ToString();
-                }
+                string sTmpData = TmpDta;
+                StringBuilder sbTmpData = new StringBuilder(sTmpData, sTmpData.Length);
 
-                resArr[3] = txt;
+                string sLicense = "7289";
+                StringBuilder sbLicense = new StringBuilder(sLicense, sLicense.Length);
+
+                string sSysFN = "Jason";
+                StringBuilder sbSysFN = new StringBuilder(sSysFN, sSysFN.Length);
+
+                string sSysLN = "Phillips";
+                StringBuilder sbSysLN = new StringBuilder(sSysLN, sSysLN.Length);
+
+                int returnPtr = PMSifReturnKcdLcl(sbCmd, sbTmpData, false, sbLicense, sbSysFN, sbSysLN);
+                resArr[1] = returnPtr.ToString();
+                resArr[2] = sbTmpData.ToString();
+
+                //int byteSize = 300;
+                //byte[] retBytes = new byte[byteSize];
+                //Marshal.Copy(returnPtr, retBytes, 0, byteSize);
+
+                //string txt = "";
+                //for (int i = 0; i < byteSize; i++) {
+                    //txt += retBytes[i].ToString() + " ";
+                //}
+                //resArr[2] = txt;
             }
             catch (Exception e)
             {
-                resArr[4] = e.Message;
+                resArr[3] = e.Message;
             }
 
             return resArr;  
@@ -202,11 +252,19 @@ const RFIDEncoder = function (obj) {
 
 };
 
-RFIDEncoder.encodeKey = (pdfs, result) => {
-    edgeCSEncodeInfo(pdfs, function (error, retVal) {
+RFIDEncoder.registerPMS = (reqBody, result) => {
+    edgeCSRegisterPMS(reqBody, function (error, retVal) {
         if (error) throw error;
         console.log(retVal);
-        result(null, { retInt: retVal, ...pdfs });
+        result(null, { retInt: retVal, ...reqBody });
+    });
+};
+
+RFIDEncoder.encodeKey = (reqBody, result) => {
+    edgeCSEncodeInfo(reqBody, function (error, retVal) {
+        if (error) throw error;
+        console.log(retVal);
+        result(null, { retInt: retVal, ...reqBody });
     });
 };
 

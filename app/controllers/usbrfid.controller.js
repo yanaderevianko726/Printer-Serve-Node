@@ -47,6 +47,23 @@ exports.readRfidData = (req, res) => {
   });
 };
 
+exports.registerPMS = (req, res) => {
+  if (!req.body) {
+    res.status(400).send({
+      message: "Content can not be empty!"
+    });
+  }
+
+  RFIDEncoder.registerPMS(req.body, (err, data) => {
+    if (err)
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while creating the Pdf."
+      });
+    else res.send(data);
+  });
+};
+
 exports.encodeKeyCard = (req, res) => {
   if (!req.body) {
     res.status(400).send({
