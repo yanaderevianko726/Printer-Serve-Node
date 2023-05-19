@@ -95,7 +95,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
     public class Startup
     {
         [DllImport(@"C:\Program Files (x86)\ASSA ABLOY\Vision\pmsif.dll")]
-        public static extern int PMSifReturnKcdLcl(StringBuilder ff, StringBuilder Dta, bool Dbg, StringBuilder szOpId, StringBuilder szOpFirst, StringBuilder szOpLast);
+        public static extern int PMSifReturnKcdLcl(char ff, char[] Dta, bool Dbg, StringBuilder szOpId, StringBuilder szOpFirst, StringBuilder szOpLast);
 
         private void convertStr(byte[] after, string before, int length)
         {
@@ -120,21 +120,9 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             ClsPdf clsPdf = new ClsPdf();
             clsPdf.initWithDynamic(input);
 
-            int asciiInt = 2;
+            int asciiInt = 30;
             char charOfAscii = (char) asciiInt;
             string strOfChar = charOfAscii.ToString();
-
-            string ffSTX = strOfChar;  // ascii 2, start of text
-
-            asciiInt = 3;
-            charOfAscii = (char) asciiInt;
-            strOfChar = charOfAscii.ToString();
-
-            string ffETX = strOfChar;  // ascii 3, end of text
-
-            asciiInt = 30;
-            charOfAscii = (char) asciiInt;
-            strOfChar = charOfAscii.ToString();
 
             string ffRS = "";  // ascii 30, record separater
 
@@ -159,7 +147,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
 
             // string rNum = Regex.Replace(clsPdf.roomNum,"[^0-9]","");
             string rNum = convertStrToAscii("101");
-            TmpDta += "G" + ffRS + ffR + clsPdf.roomNum;
+            TmpDta += ffR + clsPdf.roomNum;
 
             string rRoomTyp = convertStrToAscii("Single Room");
             TmpDta += ffRS + ffT + "Single Room";
@@ -188,10 +176,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             TmpDta += ffRS + ffO + oDate;
 
             //TmpDta += ffRS + ffJ5;
-            //TmpDta += ffNull;
-
-            string[] resArr = new string[4];
-            resArr[0] = TmpDta; 
+            //TmpDta += ffNull; 
 
             //Directory.SetCurrentDirectory(@"C:\Program Files (x86)\ASSA ABLOY\Vision\");
             
@@ -200,6 +185,8 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             //IntPtr pmsRet = GetProcAddress(pmsApi, "PMSifReturnKcdLcl"); 
             //SPMSifReturnKcdLcl spmsRet = (SPMSifReturnKcdLcl) Marshal.GetDelegateForFunctionPointer(pmsRet, typeof(SPMSifReturnKcdLcl));
 
+            string[] resArr = new string[4];
+            resArr[0] = "";
             resArr[1] = "";
             resArr[2] = "";
             resArr[3] = "";
@@ -211,8 +198,9 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
                 string sCmd = "G";
                 StringBuilder sbCmd = new StringBuilder(sCmd, sCmd.Length);
 
-                string sTmpData = TmpDta;
-                StringBuilder sbTmpData = new StringBuilder(sTmpData, sTmpData.Length);
+                resArr[0] = TmpDta;
+                StringBuilder sbTmpData = new StringBuilder(TmpDta, TmpDta.Length);
+                resArr[1] = sbTmpData.ToString();
 
                 string sLicense = "7289";
                 StringBuilder sbLicense = new StringBuilder(sLicense, sLicense.Length);
@@ -223,9 +211,23 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
                 string sSysLN = "Phillips";
                 StringBuilder sbSysLN = new StringBuilder(sSysLN, sSysLN.Length);
 
-                int returnPtr = PMSifReturnKcdLcl(sbCmd, sbTmpData, false, sbLicense, sbSysFN, sbSysLN);
-                resArr[1] = returnPtr.ToString();
-                resArr[2] = sbTmpData.ToString();
+                char[] dtas = new char[301];
+                char[] charArr = TmpDta.ToCharArray();
+                
+                int dtaCount = 0;
+                foreach (char ch in charArr)
+                {
+                    dtas[dtaCount] = ch;
+                    dtaCount++;
+                }
+
+                for (int i = 0; i < 301; i++) 
+                {
+                    dtas[i] = '0';
+                }
+
+                int returnPtr = PMSifReturnKcdLcl('I', dtas, false, sbLicense, sbSysFN, sbSysLN);
+                resArr[2] = returnPtr.ToString();
 
                 //int byteSize = 300;
                 //byte[] retBytes = new byte[byteSize];
@@ -239,7 +241,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             }
             catch (Exception e)
             {
-                resArr[3] = e.Message;
+                resArr[3] = "Error: " + e.Message;
             }
 
             return resArr;  
@@ -261,11 +263,13 @@ RFIDEncoder.registerPMS = (reqBody, result) => {
 };
 
 RFIDEncoder.encodeKey = (reqBody, result) => {
-    edgeCSEncodeInfo(reqBody, function (error, retVal) {
-        if (error) throw error;
-        console.log(retVal);
-        result(null, { retInt: retVal, ...reqBody });
-    });
+    var dta = "R102TSingle RoomFJustinNDeanURegular GuestD202305291415O202306301215";
+    libm.PMSifReturnKcdLcl("G", dta, false, "7289", "Jason", "Phillips");
+    // edgeCSEncodeInfo(reqBody, function (error, retVal) {
+    //     if (error) throw error;
+    //     console.log(retVal);
+    //     result(null, { retInt: retVal, ...reqBody });
+    // });
 };
 
 module.exports = RFIDEncoder;
