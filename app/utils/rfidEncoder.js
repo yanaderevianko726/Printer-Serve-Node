@@ -24,9 +24,6 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
         [DllImport("function.dll")]
         public static extern int UL_HLRead(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
-        TcpClient tcpClient = new TcpClient();
-        NetworkStream networkStream;
-
         const int CMD_REGISTER = 1;
         const int CMD_UNREGISTER = 2;
         const int CMD_ENCODEKEDLCL = 3;
@@ -205,6 +202,9 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             int nRet = UL_HLRead(mode, blk_add, snr, buffer);
 
             if (nRet == 0) {
+                TcpClient tcpClient = new TcpClient();
+                NetworkStream networkStream;
+
                 cardSerialNum = "";
                 for(int i=0; i<7; i++)
                 {
@@ -254,13 +254,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
                     }
 
                     networkStream = tcpClient.GetStream();
-                    if (networkStream.CanWrite)
-                    {
-                        networkStream.Write(byteArray1, 0, byteArray1.Length);
-                    }
-                    else {
-                        tcpClient.Close();
-                    }
+                    networkStream.Write(byteArray1, 0, byteArray1.Length);
 
                     SPMSifReturnKcdLclMsg RetnMsg = new SPMSifReturnKcdLclMsg();
                     RetnMsg.hdr1 = SetHeader(CMD_RETURNKCDLCL);
@@ -307,30 +301,14 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
                     }
 
                     networkStream = tcpClient.GetStream();
-                    if (networkStream.CanWrite)
-                    {
-                        await networkStream.WriteAsync(byteArray, 0, byteArray.Length);
-                        await networkStream.FlushAsync();
+                    await networkStream.WriteAsync(byteArray, 0, byteArray.Length);
+                    await networkStream.FlushAsync();
 
-                        if (networkStream.CanRead)
-                        {
-                            await networkStream.ReadAsync(readBytes, 0, socketReceiveSize, CancellationToken.None);
+                    await networkStream.ReadAsync(readBytes, 0, socketReceiveSize, CancellationToken.None);
 
-                            int cmdInt = int.Parse(readBytes[hdrSize].ToString());
-                            char cmdChar = (char)cmdInt;
-                            strCmdRet = cmdChar.ToString();
-                        }
-                        else
-                        {
-                            strCmdRet = "1";
-                            tcpClient.Close();
-                        }
-                    }
-                    else if (!networkStream.CanWrite)
-                    {
-                        strCmdRet = "2";
-                        tcpClient.Close();
-                    }
+                    int cmdInt = int.Parse(readBytes[hdrSize].ToString());
+                    char cmdChar = (char)cmdInt;
+                    strCmdRet = cmdChar.ToString();
 
                     // send returnkey socket in second
                     for(int ii=0; ii< socketReceiveSize; ii++)
@@ -339,30 +317,14 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
                     }
 
                     networkStream = tcpClient.GetStream();
-                    if (networkStream.CanWrite)
-                    {
-                        await networkStream.WriteAsync(byteArray, 0, byteArray.Length);
-                        await networkStream.FlushAsync();
+                    await networkStream.WriteAsync(byteArray, 0, byteArray.Length);
+                    await networkStream.FlushAsync();
 
-                        if (networkStream.CanRead)
-                        {
-                            await networkStream.ReadAsync(readBytes, 0, socketReceiveSize, CancellationToken.None);
+                    await networkStream.ReadAsync(readBytes, 0, socketReceiveSize, CancellationToken.None);
 
-                            int cmdInt = int.Parse(readBytes[hdrSize].ToString());
-                            char cmdChar = (char)cmdInt;
-                            strCmdRet = cmdChar.ToString();
-                        }
-                        else
-                        {
-                            strCmdRet = "1";
-                            tcpClient.Close();
-                        }
-                    }
-                    else if (!networkStream.CanWrite)
-                    {
-                        strCmdRet = "2";
-                        tcpClient.Close();
-                    }
+                    cmdInt = int.Parse(readBytes[hdrSize].ToString());
+                    cmdChar = (char)cmdInt;
+                    strCmdRet = cmdChar.ToString();
 
                     string encodedKey = "";
                     if(strCmdRet == "0")
@@ -375,9 +337,12 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
                         }
                         resArr[2] = encodedKey; 
                     }
+
+                    networkStream.Close();
+                    tcpClient.Close();
                 }
                 catch (Exception ex) {
-                    resArr[2] = ""; 
+                    resArr[2] = ex.Message; 
                 }
             } 
 
