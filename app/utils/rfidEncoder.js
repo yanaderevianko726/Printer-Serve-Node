@@ -159,8 +159,21 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             Dta = Dta + code.ToString() + "F" + strFname;
             Dta = Dta + code.ToString() + "N" + strFname;
             Dta = Dta + code.ToString() + "U" + strGroup;
-            Dta = Dta + code.ToString() + "D" + strStartD;
-            Dta = Dta + code.ToString() + "O" + strEndD;
+
+            string[] sDate0 = strStartD.Split(' ');
+            string[] sDate1 = sDate0[0].Split('-');
+            string[] sDate2 = sDate0[1].Split(':');
+            string dDate = sDate1[0] + sDate1[1] + sDate1[2] + sDate2[0] + sDate2[1];
+
+            Dta = Dta + code.ToString() + "D" + dDate;
+
+            string[] eDate0 = strEndD.Split(' ');
+            string[] eDate1 = eDate0[0].Split('-');
+            string[] eDate2 = eDate0[1].Split(':');
+            string oDate = eDate1[0] + eDate1[1] + eDate1[2] + eDate2[0] + eDate2[1];
+
+            Dta = Dta + code.ToString() + "O" + oDate;
+            
             Dta = Dta + code.ToString() + "J1";
             Dta = Dta + code.ToString() + "S" + cardSerialNum;
             Dta = Dta + code.ToString() + "V" + cardUniqueId;
