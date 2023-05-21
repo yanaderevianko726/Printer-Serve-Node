@@ -375,7 +375,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
                             byte[] buffer1 = new byte[4];
                             convertStr(buffer1, bufferStr, 4);
 
-                            int nRet = UL_HLWrite(mode, blk_add_r, snr, buffer1);
+                            int nnRet = UL_HLWrite(mode, blk_add_r, snr, buffer1);
                         }
                     }
 
