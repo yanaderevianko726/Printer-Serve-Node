@@ -24,6 +24,9 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
         [DllImport("function.dll")]
         public static extern int UL_HLRead(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
 
+        [DllImport("function.dll")]
+        public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
+
         const int CMD_REGISTER = 1;
         const int CMD_UNREGISTER = 2;
         const int CMD_ENCODEKEDLCL = 3;
@@ -178,6 +181,25 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             }
         }
 
+        private string formatStr(string str, int num_blk)
+        {            
+            string tmp=Regex.Replace(str,"[^a-fA-F0-9]","");
+            if (num_blk == -1) return tmp;
+            if (num_blk < -1) {
+                if (tmp.Length != -16 / num_blk * 2) return null;
+                else return tmp;
+            }
+            if (tmp.Length != 16*num_blk*2) return null;
+            else return tmp;
+        }
+
+        private void convertStr(byte[] after, string before, int length)
+        {
+            for (int i = 0; i < length; i++) {
+                after[i] = Convert.ToByte(before.Substring(2 * i, 2), 16);
+            }
+        }
+
         public async Task<object> Invoke(dynamic input)
         { 
             strFname = input.firstName;
@@ -194,7 +216,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             byte[] snr = new byte[7];
             byte[] buffer = new byte[16];
 
-            string[] resArr = new string[3];
+            string[] resArr = new string[15];
             resArr[0] = "";
             resArr[1] = "";
             resArr[2] = "";
@@ -336,6 +358,25 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
                             encodedKey += ch;
                         }
                         resArr[2] = encodedKey; 
+
+                        string[] blk_list = new string[12]{ "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15" };
+
+                        int blk_count = 12;
+                        for (int i = 0; i < blk_count; i++) 
+                        {
+                            byte blk_add_r = Convert.ToByte(blk_list[i], 16);
+
+                            string subHexString = encodedKey.Substring(8 * i, 8);
+                            resArr[i+3] = subHexString;
+
+                            string bufferStr = "";
+                            bufferStr = formatStr(subHexString, -1);
+
+                            byte[] buffer1 = new byte[4];
+                            convertStr(buffer1, bufferStr, 4);
+
+                            int nRet = UL_HLWrite(mode, blk_add_r, snr, buffer1);
+                        }
                     }
 
                     networkStream.Close();
