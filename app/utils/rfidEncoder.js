@@ -36,6 +36,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
         int returnKeyDtaSize = 0, hdrSize = 0, socketReceiveSize = 0;
         byte[] readBytes;
 
+        string ipAddress = "127.0.0.1";
         string cardSerialNum = "", cardUniqueId = "";
         string strRoom = "", strType = "Single Room", strGroup = "Regular Guest", strFname = "", strLname = "", strStartD = "", strEndD = "";
         string strLicense = "23516441", strApplName = "Test_Program";
@@ -157,7 +158,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             Dta = code.ToString() + "R" + strRoom;
             Dta = Dta + code.ToString() + "T" + strType;
             Dta = Dta + code.ToString() + "F" + strFname;
-            Dta = Dta + code.ToString() + "N" + strFname;
+            Dta = Dta + code.ToString() + "N" + strLname;
             Dta = Dta + code.ToString() + "U" + strGroup;
 
             string[] sDate0 = strStartD.Split(' ');
@@ -261,7 +262,7 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
                 readBytes = new byte[socketReceiveSize];
 
                 try {
-                    tcpClient.Connect("127.0.0.1", 3015);
+                    tcpClient.Connect(ipAddress, 3015);
 
                     SPMSifRegisterMsg RegMsg = new SPMSifRegisterMsg();
                     RegMsg.hdr1 = SetHeader(CMD_REGISTER);

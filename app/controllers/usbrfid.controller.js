@@ -12,15 +12,14 @@ exports.initController = (req, res) => {
   res.send("Welcome to rfid reader module.");
 };
 
-exports.writeRfidData = (req, res) => {
+exports.readRfidData = (req, res) => {
   if (!req.body) {
     res.status(400).send({
       message: "Content can not be empty!"
     });
   }
 
-  const rfidData = new RfidData(req.body);
-  UsbRfid.writeInfo(rfidData, (err, data) => {
+  UsbRfid.readInfo(req.body, (err, data) => {
     if (err)
       res.status(500).send({
         message:
@@ -30,14 +29,14 @@ exports.writeRfidData = (req, res) => {
   });
 };
 
-exports.readRfidData = (req, res) => {
+exports.writeRfidData = (req, res) => {
   if (!req.body) {
     res.status(400).send({
       message: "Content can not be empty!"
     });
   }
-
-  UsbRfid.readInfo((err, data) => {
+  
+  UsbRfid.writeInfo(req.body, (err, data) => {
     if (err)
       res.status(500).send({
         message:
