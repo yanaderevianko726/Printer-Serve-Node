@@ -115,7 +115,7 @@ const UsbRfid = function (obj) {
 
 };
 
-UsbRfid.readInfo = (reqBody, result) => {
+UsbRfid.readCardInfo = (reqBody, result) => {
     edgeCSReadInfo(reqBody, function (error, retVal) {
         if (error) throw error;
         console.log(retVal);
@@ -123,7 +123,7 @@ UsbRfid.readInfo = (reqBody, result) => {
     });
 };
 
-UsbRfid.writeInfo = (reqBody, result) => {
+UsbRfid.writteCardInfo = (reqBody, result) => {
     edgeCSWriteInfo(reqBody, function (error, retVal) {
         if (error) throw error;
         console.log(retVal);

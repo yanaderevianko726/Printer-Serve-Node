@@ -349,7 +349,7 @@ const RFIDEncoder = function (obj) {
 
 };
 
-RFIDEncoder.encodeKey = (reqBody, result) => {
+RFIDEncoder.encodeKeycard = (reqBody, result) => {
     edgeCSEncodeInfo(reqBody, function (error, retVal) {
         if (error) throw error;
         console.log(retVal);
