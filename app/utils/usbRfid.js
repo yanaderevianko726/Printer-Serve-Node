@@ -86,23 +86,25 @@ var edgeCSWriteInfo = edgeCS.func(function () {/*
         {   
             string wData = input.wData; 
 
-            byte mode = 0x00;
-            byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
-            string[] blks = new string[12]{ "04", "05", "06", "07", "08", "09", "0A", "0B", "0C", "0D", "0E", "0F" };            
-            
-            int blk_count = 12;
-            int nRet = 0;
-            for (int i = 0; i < blk_count; i++) 
-            {
-                byte blk_add = Convert.ToByte(blks[i], 16);
+            int nRet = 1;
+            if(wData != ""){
+                byte mode = 0x00;
+                byte[] snr = new byte[7] { 0, 0, 0, 0, 0, 0, 0 };
+                string[] blks = new string[12]{ "04", "05", "06", "07", "08", "09", "0A", "0B", "0C", "0D", "0E", "0F" };            
+                
+                int blk_count = 12;
+                for (int i = 0; i < blk_count; i++) 
+                {
+                    byte blk_add = Convert.ToByte(blks[i], 16);
 
-                string subHexString = wData.Substring(8 * i, 8);
-                byte[] buffer = new byte[4];
-                for (int j = 0; j < 4; j++) {
-                    buffer[j] = Convert.ToByte(subHexString.Substring(2 * j, 2), 16);
+                    string subHexString = wData.Substring(8 * i, 8);
+                    byte[] buffer = new byte[4];
+                    for (int j = 0; j < 4; j++) {
+                        buffer[j] = Convert.ToByte(subHexString.Substring(2 * j, 2), 16);
+                    }
+
+                    nRet = UL_HLWrite(mode, blk_add, snr, buffer);
                 }
-
-                nRet = UL_HLWrite(mode, blk_add, snr, buffer);
             }
 
             return nRet;  
