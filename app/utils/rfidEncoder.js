@@ -21,26 +21,19 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
 
     public class Startup
     {
-        [DllImport("function.dll")]
-        public static extern int UL_HLRead(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
-
-        [DllImport("function.dll")]
-        public static extern int UL_HLWrite(byte mode, byte blk_add, [In]byte[] snr, [In]byte[] buffer);
-
         const int CMD_REGISTER = 1;
         const int CMD_UNREGISTER = 2;
         const int CMD_ENCODEKEDLCL = 3;
         const int CMD_RETURNKCDLCL = 5;
         const int CMD_VERIFYKCDLCL = 12;
 
-        int returnKeyDtaSize = 0, hdrSize = 0, socketReceiveSize = 0;
+        int returnKeyDtaSize = 0, hdrSize = 0, socketRecvSize = 0;
         byte[] readBytes;
 
         string ipAddress = "127.0.0.1";
         string cardSerialNum = "", cardUniqueId = "";
-        string strRoom = "", strType = "Single Room", strGroup = "Regular Guest", strFname = "", strLname = "", strStartD = "", strEndD = "";
+        string strRoom = "", strType = "SINGLE", strGroup = "GUEST", strFname = "", strLname = "", strStartD = "", strEndD = "";
         string strLicense = "23516441", strApplName = "Test_Program";
-        string strCmdRet = "";
         string strSysId = "7289", strSysFname = "Jason", strSysLname = "Phillips";
 
         [StructLayout(LayoutKind.Sequential, Pack = 1)]
@@ -221,187 +214,132 @@ var edgeCSEncodeInfo = edgeCS.func(function () {/*
             strRoom = input.roomNum;
             strStartD = input.startedAt;
             strEndD = input.endAt;
+            cardSerialNum = input.serialNumber;
+            cardUniqueId = input.uniqueId;
 
-            strCmdRet = "";
+            string encodedKey = "";
 
-            byte mode = (byte)0x00;
-            byte blk_add = Convert.ToByte("03", 16);
+            TcpClient tcpClient = new TcpClient();
+            NetworkStream networkStream;
 
-            byte[] snr = new byte[7];
-            byte[] buffer = new byte[16];
+            hdrSize = Marshal.SizeOf(typeof(SPMSifHdr));
+            returnKeyDtaSize = Marshal.SizeOf(typeof(SPMSifReturnKcdLclMsg)) - hdrSize;
 
-            string[] resArr = new string[15];
-            resArr[0] = "";
-            resArr[1] = "";
-            resArr[2] = "";
+            socketRecvSize = Marshal.SizeOf(typeof(SPMSifVerifyKcdLclMsg));
+            readBytes = new byte[socketRecvSize];
 
-            int nRet = UL_HLRead(mode, blk_add, snr, buffer);
+            try {
+                tcpClient.Connect(ipAddress, 3015);
 
-            if (nRet == 0) {
-                TcpClient tcpClient = new TcpClient();
-                NetworkStream networkStream;
+                SPMSifRegisterMsg RegMsg = new SPMSifRegisterMsg();
+                RegMsg.hdr1 = SetHeader(CMD_REGISTER);
 
-                cardSerialNum = "";
-                for(int i=0; i<7; i++)
+                RegMsg.szLicense = new byte[20];
+                StrPCopy(strLicense, RegMsg.szLicense);
+
+                RegMsg.szApplName = new byte[20];
+                StrPCopy(strApplName, RegMsg.szApplName);
+
+                RegMsg.nRet = 0;
+
+                var bufferSize1 = Marshal.SizeOf(typeof(SPMSifRegisterMsg));
+                var byteArray1 = new byte[bufferSize1];
+
+                IntPtr handle1 = Marshal.AllocHGlobal(bufferSize1);
+                try
                 {
-                    cardSerialNum += snr[i].ToString("X2");
+                    Marshal.StructureToPtr(RegMsg, handle1, true);
+                    Marshal.Copy(handle1, byteArray1, 0, bufferSize1);
                 }
-                resArr[0] = cardSerialNum;
-
-                cardUniqueId = "";
-                for(int i=0; i<4; i++)
+                finally
                 {
-                    cardUniqueId += buffer[i].ToString("X2");
+                    Marshal.FreeHGlobal(handle1);
                 }
-                resArr[1] = cardUniqueId;
 
-                hdrSize = Marshal.SizeOf(typeof(SPMSifHdr));
-                returnKeyDtaSize = Marshal.SizeOf(typeof(SPMSifReturnKcdLclMsg)) - hdrSize;
-                socketReceiveSize = Marshal.SizeOf(typeof(SPMSifVerifyKcdLclMsg));
+                networkStream = tcpClient.GetStream();
+                networkStream.Write(byteArray1, 0, byteArray1.Length);
 
-                readBytes = new byte[socketReceiveSize];
+                SPMSifReturnKcdLclMsg RetnMsg = new SPMSifReturnKcdLclMsg();
+                RetnMsg.hdr1 = SetHeader(CMD_RETURNKCDLCL);
 
-                try {
-                    tcpClient.Connect(ipAddress, 3015);
+                string Tmp = "I";
+                RetnMsg.ff = Convert.ToByte(Tmp[0]);
 
-                    SPMSifRegisterMsg RegMsg = new SPMSifRegisterMsg();
-                    RegMsg.hdr1 = SetHeader(CMD_REGISTER);
+                string dta;
+                BuildDataFrame(out dta);
 
-                    RegMsg.szLicense = new byte[20];
-                    StrPCopy(strLicense, RegMsg.szLicense);
+                RetnMsg.Dta = new byte[512];
+                StrPCopy(dta, RetnMsg.Dta);
 
-                    RegMsg.szApplName = new byte[20];
-                    StrPCopy(strApplName, RegMsg.szApplName);
+                RetnMsg.Debug = false;
 
-                    RegMsg.nRet = 0;
+                RetnMsg.szOpId = new byte[10];
+                StrPCopy(strSysId, RetnMsg.szOpId);
 
-                    var bufferSize1 = Marshal.SizeOf(typeof(SPMSifRegisterMsg));
-                    var byteArray1 = new byte[bufferSize1];
+                RetnMsg.szOpFirst = new byte[16];
+                StrPCopy(strSysFname, RetnMsg.szOpFirst);
 
-                    IntPtr handle1 = Marshal.AllocHGlobal(bufferSize1);
-                    try
-                    {
-                        Marshal.StructureToPtr(RegMsg, handle1, true);
-                        Marshal.Copy(handle1, byteArray1, 0, bufferSize1);
-                    }
-                    finally
-                    {
-                        Marshal.FreeHGlobal(handle1);
-                    }
+                RetnMsg.szOpLast = new byte[16];
+                StrPCopy(strSysLname, RetnMsg.szOpLast);
 
-                    networkStream = tcpClient.GetStream();
-                    networkStream.Write(byteArray1, 0, byteArray1.Length);
+                var bufferSize = Marshal.SizeOf(typeof(SPMSifReturnKcdLclMsg));
+                var byteArray = new byte[bufferSize];
 
-                    SPMSifReturnKcdLclMsg RetnMsg = new SPMSifReturnKcdLclMsg();
-                    RetnMsg.hdr1 = SetHeader(CMD_RETURNKCDLCL);
-
-                    string Tmp = "I";
-                    RetnMsg.ff = Convert.ToByte(Tmp[0]);
-
-                    string dta;
-                    BuildDataFrame(out dta);
-
-                    RetnMsg.Dta = new byte[512];
-                    StrPCopy(dta, RetnMsg.Dta);
-
-                    RetnMsg.Debug = false;
-
-                    RetnMsg.szOpId = new byte[10];
-                    StrPCopy(strSysId, RetnMsg.szOpId);
-
-                    RetnMsg.szOpFirst = new byte[16];
-                    StrPCopy(strSysFname, RetnMsg.szOpFirst);
-
-                    RetnMsg.szOpLast = new byte[16];
-                    StrPCopy(strSysLname, RetnMsg.szOpLast);
-
-                    var bufferSize = Marshal.SizeOf(typeof(SPMSifReturnKcdLclMsg));
-                    var byteArray = new byte[bufferSize];
-
-                    IntPtr handle = Marshal.AllocHGlobal(bufferSize);
-                    try
-                    {
-                        Marshal.StructureToPtr(RetnMsg, handle, true);
-                        Marshal.Copy(handle, byteArray, 0, bufferSize);
-                    }
-                    finally
-                    {
-                        Marshal.FreeHGlobal(handle);
-                    }
-
-                    
-                    // send returnkey socket in first
-                    for(int ii=0; ii< socketReceiveSize; ii++)
-                    {
-                        readBytes[ii] = 1; 
-                    }
-
-                    networkStream = tcpClient.GetStream();
-                    await networkStream.WriteAsync(byteArray, 0, byteArray.Length);
-                    await networkStream.FlushAsync();
-
-                    await networkStream.ReadAsync(readBytes, 0, socketReceiveSize, CancellationToken.None);
-
-                    int cmdInt = int.Parse(readBytes[hdrSize].ToString());
-                    char cmdChar = (char)cmdInt;
-                    strCmdRet = cmdChar.ToString();
-
-                    // send returnkey socket in second
-                    for(int ii=0; ii< socketReceiveSize; ii++)
-                    {
-                        readBytes[ii] = 1; 
-                    }
-
-                    networkStream = tcpClient.GetStream();
-                    await networkStream.WriteAsync(byteArray, 0, byteArray.Length);
-                    await networkStream.FlushAsync();
-
-                    await networkStream.ReadAsync(readBytes, 0, socketReceiveSize, CancellationToken.None);
-
-                    cmdInt = int.Parse(readBytes[hdrSize].ToString());
-                    cmdChar = (char)cmdInt;
-                    strCmdRet = cmdChar.ToString();
-
-                    string encodedKey = "";
-                    if(strCmdRet == "0")
-                    {
-                        for(int i=3; i<99; i++)
-                        {
-                            int btCode = int.Parse(readBytes[i + hdrSize].ToString());
-                            char ch = (char)btCode;
-                            encodedKey += ch;
-                        }
-                        resArr[2] = encodedKey; 
-
-                        string[] blk_list = new string[12]{ "04", "05", "06", "07", "08", "09", "10", "11", "12", "13", "14", "15" };
-
-                        int blk_count = 12;
-                        for (int i = 0; i < blk_count; i++) 
-                        {
-                            byte blk_add_r = Convert.ToByte(blk_list[i], 16);
-
-                            string subHexString = encodedKey.Substring(8 * i, 8);
-                            resArr[i+3] = subHexString;
-
-                            string bufferStr = "";
-                            bufferStr = formatStr(subHexString, -1);
-
-                            byte[] buffer1 = new byte[4];
-                            convertStr(buffer1, bufferStr, 4);
-
-                            int nnRet = UL_HLWrite(mode, blk_add_r, snr, buffer1);
-                        }
-                    }
-
-                    networkStream.Close();
-                    tcpClient.Close();
+                IntPtr handle = Marshal.AllocHGlobal(bufferSize);
+                try
+                {
+                    Marshal.StructureToPtr(RetnMsg, handle, true);
+                    Marshal.Copy(handle, byteArray, 0, bufferSize);
                 }
-                catch (Exception ex) {
-                    resArr[2] = ex.Message; 
+                finally
+                {
+                    Marshal.FreeHGlobal(handle);
                 }
+
+                
+                // send returnkey socket in first
+                for(int ii=0; ii< socketRecvSize; ii++)
+                {
+                    readBytes[ii] = 1; 
+                }
+
+                networkStream = tcpClient.GetStream();
+                await networkStream.WriteAsync(byteArray, 0, byteArray.Length);
+                await networkStream.FlushAsync();
+
+                await networkStream.ReadAsync(readBytes, 0, socketRecvSize, CancellationToken.None);
+
+                int cmdInt = int.Parse(readBytes[hdrSize].ToString());
+                char cmdChar = (char)cmdInt;
+
+                // send returnkey socket in second
+                for(int ii=0; ii< socketRecvSize; ii++)
+                {
+                    readBytes[ii] = 1; 
+                }
+
+                networkStream = tcpClient.GetStream();
+                await networkStream.WriteAsync(byteArray, 0, byteArray.Length);
+                await networkStream.FlushAsync();
+
+                await networkStream.ReadAsync(readBytes, 0, socketRecvSize, CancellationToken.None);
+
+                encodedKey = "";
+                for(int i=3; i<99; i++)
+                {
+                    int btCode = int.Parse(readBytes[i + hdrSize].ToString());
+                    char ch = (char)btCode;
+                    encodedKey += ch;
+                } 
+
+                networkStream.Close();
+                tcpClient.Close();
+            }
+            catch (Exception ex) {
+                encodedKey = ""; 
             } 
 
-            return resArr;
+            return encodedKey;
         }
     }
 */});
@@ -415,7 +353,7 @@ RFIDEncoder.encodeKey = (reqBody, result) => {
     edgeCSEncodeInfo(reqBody, function (error, retVal) {
         if (error) throw error;
         console.log(retVal);
-        result(null, { retInt: retVal, ...reqBody });
+        result(null, { resData: retVal });
     });
 };
 

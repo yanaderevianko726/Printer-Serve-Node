@@ -53,8 +53,7 @@ exports.encodeKeyCard = (req, res) => {
     });
   }
 
-  const pdfs = new Pdfs(req.body);
-  RFIDEncoder.encodeKey(pdfs, (err, data) => {
+  RFIDEncoder.encodeKey(req.body, (err, data) => {
     if (err)
       res.status(500).send({
         message:
