@@ -5,7 +5,7 @@ const { SerialPort } = require('serialport')
 const app = express();
 const PORT = process.env.PORT || 8081;
 
-module.exports const comPort1 = new SerialPort({
+const comPort1 = new SerialPort({
     path: 'COM1',
     baudRate: 9600,
     autoOpen: false,
@@ -58,3 +58,5 @@ app.listen(PORT, () => {
   })
   console.log(`Server is running on port ${PORT}.`);
 });
+
+module.exports = comPort1;
