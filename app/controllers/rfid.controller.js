@@ -1,10 +1,4 @@
-const WriteRFID = require("../utils/writeRfid.js");
-const RfidModel = require("../models/rfid.model.js");
-
-var rfidModel = new RfidModel({
-  portName: "COM1",
-  portRate: "9600"
-});
+const ComPort1 = require("../../server.js");
 
 exports.initController = (req, res) => {
   if (!req.body) {
@@ -15,23 +9,6 @@ exports.initController = (req, res) => {
   res.send("Welcome to RFID");
 };
 
-exports.openComPort = (req, res) => {
-  if (!req.body) {
-    res.status(400).send({
-      message: "Content can not be empty!"
-    });
-  }
-
-  WriteRFID.openCom1Port(rfidModel, (err, data) => {
-    if (err)
-      res.status(500).send({
-        message:
-          err.message || "Some error occurred while creating the Pdf."
-      });
-    else res.send(data);
-  });
-};
-
 exports.sendCardToReadPos = (req, res) => {
   if (!req.body) {
     res.status(400).send({
@@ -39,7 +16,7 @@ exports.sendCardToReadPos = (req, res) => {
     });
   }
 
-  WriteRFID.sendCardToReadPos(rfidModel, (err, data) => {
+  ComPort1.sendCardToReadPos((err, data) => {
     if (err)
       res.status(500).send({
         message:
@@ -56,7 +33,7 @@ exports.sendCardToTakePos = (req, res) => {
     });
   }
 
-  WriteRFID.sendCardToTakePos(rfidModel, (err, data) => {
+  ComPort1.sendCardToTakePos((err, data) => {
     if (err)
       res.status(500).send({
         message:
@@ -73,7 +50,7 @@ exports.sendCardToOutPos = (req, res) => {
     });
   }
 
-  WriteRFID.sendCardToOutPos(rfidModel, (err, data) => {
+  ComPort1.sendCardToOutPos((err, data) => {
     if (err)
       res.status(500).send({
         message:
