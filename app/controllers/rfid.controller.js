@@ -1,4 +1,4 @@
-const ComPort1 = require("../../server.js");
+const ComPort1 = require("../utils/comport1.js");
 
 exports.initController = (req, res) => {
   if (!req.body) {
@@ -8,6 +8,23 @@ exports.initController = (req, res) => {
   }
   res.send("Welcome to RFID");
 };
+
+exports.openComport1 = (req, res) => {
+  if (!req.body) {
+    res.status(400).send({
+      message: "Content can not be empty!"
+    });
+  }
+
+  ComPort1.openComport((err, data) => {
+    if (err)
+      res.status(500).send({
+        message:
+          err.message || "Some error occurred while creating the Pdf."
+      });
+    else res.send(data);
+  });
+}
 
 exports.sendCardToReadPos = (req, res) => {
   if (!req.body) {
