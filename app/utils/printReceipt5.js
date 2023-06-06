@@ -131,7 +131,7 @@ var edgePrintReceipt5 = edge.func(function () {/*
             SetBold(0);
 
             StringBuilder sbPrint = new StringBuilder("Res No                : ");
-            sbPrint.Append(clsPdf.pmKey);
+            sbPrint.Append(clsPdf.pmKey.ToString());
             PrintString(sbPrint, 0);
 
             sbPrint = new StringBuilder("Rank                  : ");
