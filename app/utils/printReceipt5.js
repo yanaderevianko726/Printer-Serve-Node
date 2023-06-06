@@ -32,18 +32,18 @@ var edgePrintReceipt5 = edge.func(function () {/*
         public string endAt = "";
 
         public void initWithDynamic(dynamic input){
-            firstName = input.firstName;
-            lastName = input.lastName;
-            pmKey = input.pmKey;
-            rank = input.rank;
-            roomKey = input.roomKey;
-            roomNum = input.roomNum;
-            mobile = input.mobile;
-            lockerNumber = input.lockerNumber;
-            bookType = input.bookType;
-            vehicle = input.vehicle;
-            startedAt = input.startedAt;
-            endAt = input.endAt;
+            firstName = input.firstName + "";
+            lastName = input.lastName + "";
+            pmKey = input.pmKey + "";
+            rank = input.rank + "";
+            roomKey = input.roomKey + "";
+            roomNum = input.roomNum + "";
+            mobile = input.mobile + "";
+            lockerNumber = input.lockerNumber + "";
+            bookType = input.bookType + "";
+            vehicle = input.vehicle + "";
+            startedAt = input.startedAt + "";
+            endAt = input.endAt + "";
         }
     }
 

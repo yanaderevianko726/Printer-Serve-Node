@@ -32,18 +32,18 @@ var edgePrintReceipt3 = edge.func(function () {/*
         public string endAt = "";
 
         public void initWithDynamic(dynamic input){
-            firstName = input.firstName;
-            lastName = input.lastName;
-            pmKey = input.pmKey;
-            rank = input.rank;
-            roomKey = input.roomKey;
-            roomNum = input.roomNum;
-            mobile = input.mobile;
-            lockerNumber = input.lockerNumber;
-            bookType = input.bookType;
-            vehicle = input.vehicle;
-            startedAt = input.startedAt;
-            endAt = input.endAt;
+            firstName = input.firstName + "";
+            lastName = input.lastName + "";
+            pmKey = input.pmKey + "";
+            rank = input.rank + "";
+            roomKey = input.roomKey + "";
+            roomNum = input.roomNum + "";
+            mobile = input.mobile + "";
+            lockerNumber = input.lockerNumber + "";
+            bookType = input.bookType + "";
+            vehicle = input.vehicle + "";
+            startedAt = input.startedAt + "";
+            endAt = input.endAt + "";
         }
     }
 
@@ -131,7 +131,7 @@ var edgePrintReceipt3 = edge.func(function () {/*
             SetBold(0);
 
             StringBuilder sbPrint = new StringBuilder("Res No                : ");
-            sbPrint.Append(clsPdf.pmKey.ToString());
+            sbPrint.Append(clsPdf.pmKey);
             PrintString(sbPrint, 0);
 
             sbPrint = new StringBuilder("Rank                  : ");
@@ -220,7 +220,7 @@ PrintReceipt3.printReceipt3 = (pdfs, thermalModel, result) => {
     edgePrintReceipt3(pdfs, function (error, retVal) {
         if (error) throw error;
         console.log(retVal);
-        result(null, { retInt: retVal, ...thermalModel });
+        result(null, { retInt: retVal, ...pdfs });
     });
 };
 
